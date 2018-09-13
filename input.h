@@ -8,8 +8,6 @@
 #include "defines.h"
 #include "maths.h"
 
-#define KEY_NUMBER 238
-
 typedef enum {
     STATE_NORMAL,
     STATE_PRESSED,
@@ -260,12 +258,6 @@ typedef enum {
     KEY_LAST
 } KEY;
 
-typedef struct mouse_button_state {
-    STATE left_mouse_button;
-    STATE center_mouse_button;
-    STATE right_mouse_button;
-} mouse_button_state_t;
-
 typedef enum {
     LEFT,
     CENTER,
@@ -273,6 +265,12 @@ typedef enum {
     BUTTON_LAST
 } BUTTON;
 
+typedef struct mouse_button_state {
+    int click_count;
+    STATE state;
+} mouse_button_state_t;
+
+// TODO: Handle double click and FIX key/button states
 typedef struct input_data {
     // KEYBOARD
     STATE last_frame_keyboard[KEY_LAST - 1];
@@ -288,9 +286,9 @@ typedef struct input_data {
     // MOUSE    
     ivec2_t mouse_pos;
     ivec2_t mouse_delta;
-    float mouse_scroll_delta;    
-    STATE last_frame_buttons[BUTTON_LAST - 1];
-    STATE current_frame_buttons[BUTTON_LAST - 1];
+    float mouse_scroll_delta;
+    mouse_button_state_t last_frame_buttons[BUTTON_LAST - 1];
+    mouse_button_state_t current_frame_buttons[BUTTON_LAST - 1];
 } input_data_t;
 
 KEY get_key_index(SDL_Keycode key);
@@ -298,7 +296,7 @@ KEY get_key_index(SDL_Keycode key);
 void update_input_data(input_data_t *input_data);
 
 STATE get_key_state(input_data_t *input_data, KEY key);
-STATE get_button_state(input_data_t *input_data, BUTTON button);
+mouse_button_state_t get_button_state(input_data_t *input_data, BUTTON button);
 
 bool is_key_normal(input_data_t *input_data, KEY key);
 bool is_key_pressed(input_data_t *input_data, KEY key);

@@ -746,10 +746,12 @@ STATE combine_key_state(STATE last_frame, STATE current_frame) {
             return STATE_NORMAL;
 
     }
-
+    
     return STATE_NORMAL;
 }
 
+// TODO: DELETE ME!!
+/*
 void handle_key_event(input_data_t *data, SDL_Event event) {
     SDL_KeyboardEvent key_event = event.key;
     SDL_Keysym key = key_event.keysym;
@@ -765,7 +767,7 @@ void handle_key_event(input_data_t *data, SDL_Event event) {
 
     STATE final = combine_key_state(last_key_state, current_key_state);
     data->current_frame_keyboard[index] = final;
-}
+}*/
 
 void handle_window_event(input_data_t *state, SDL_Event event) {
     SDL_WindowEvent win_event = event.window;
@@ -801,7 +803,7 @@ void handle_mouse_event(input_data_t *state, SDL_Event event) {
 void update_input_data(input_data_t *input_data) {
     // RESET
     memcpy(input_data->last_frame_keyboard, input_data->current_frame_keyboard, sizeof(input_data->current_frame_keyboard));
-    //memset(input_data->current_frame_keyboard, 0, sizeof(input_data->current_frame_keyboard));
+    memset(input_data->current_frame_keyboard, 0, sizeof(input_data->current_frame_keyboard));
 
     input_data->quit_event_called = false;
     input_data->window_resized = false;
@@ -845,6 +847,8 @@ void update_input_data(input_data_t *input_data) {
     for (int i = 0; i < KEY_LAST; ++i) {
         STATE last_frame = input_data->last_frame_keyboard[i];
         STATE current_frame = input_data->current_frame_keyboard[i];
+        
+        SDL_assert(last_frame != STATE_HOLDED && current_frame != STATE_PRESSED);
 
         STATE final = combine_key_state(last_frame, current_frame);
         input_data->current_frame_keyboard[i] = final;
@@ -857,8 +861,8 @@ STATE get_key_state(input_data_t *input_data, KEY key) {
     return state;
 }
 
-STATE get_button_state(input_data_t *input_data, BUTTON button) {
-    STATE state = input_data->current_frame_buttons[button];
+mouse_button_state_t get_button_state(input_data_t *input_data, BUTTON button) {
+    mouse_button_state_t state = input_data->current_frame_buttons[button];
     return state;
 }
 
@@ -883,21 +887,21 @@ bool is_key_released(input_data_t *input_data, KEY key) {
 }
 
 bool is_button_normal(input_data_t *input_data, BUTTON button) {
-    STATE state = get_button_state(input_data, button);
-    return state == STATE_NORMAL;
+    mouse_button_state_t state = get_button_state(input_data, button);
+    return state.state == STATE_NORMAL;
 }
 
 bool is_button_pressed(input_data_t *input_data, BUTTON button) {
-    STATE state = get_button_state(input_data, button);
-    return state == STATE_PRESSED;
+    mouse_button_state_t state = get_button_state(input_data, button);
+    return state.state == STATE_PRESSED;
 }
 
 bool is_button_holded(input_data_t *input_data, BUTTON button) {
-    STATE state = get_button_state(input_data, button);
-    return state == STATE_HOLDED;
+    mouse_button_state_t state = get_button_state(input_data, button);
+    return state.state == STATE_HOLDED;
 }
 
 bool is_button_released(input_data_t *input_data, BUTTON button) {
-    STATE state = get_button_state(input_data, button);
-    return state == STATE_RELEASED;
+    mouse_button_state_t state = get_button_state(input_data, button);
+    return state.state == STATE_RELEASED;
 }

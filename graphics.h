@@ -17,6 +17,8 @@ typedef struct texture {
 typedef struct texture_renderer {
     texture_t *texture;
     ivec2_t world_position;
+    
+    // TODO: Use this texture region on drawing
     ivec2_t texture_region;
 } texture_renderer_t;
 
@@ -33,7 +35,7 @@ typedef struct graphics_data {
 void load_texture_from_file(const char* file_name, SDL_Renderer *renderer, texture_t *texture);
 void destroy_texture(texture_t *texture);
 
-void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t position);
+void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t world_position);
 
 texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture);
 

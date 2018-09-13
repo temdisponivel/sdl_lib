@@ -44,8 +44,8 @@ void destroy_texture(texture_t *texture) {
     texture->handle = 0xBAAD;
 }
 
-void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t position) {
-    SDL_Rect rect = get_rect(position, texture->size);
+void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t world_position) {
+    SDL_Rect rect = get_rect(world_position, texture->size);
     SDL_RenderCopy(renderer, texture->handle, null, &rect);
 }
 
