@@ -5,7 +5,7 @@
 #ifndef SDL_GAME_MATHS_H
 #define SDL_GAME_MATHS_H
 
-#include "engine.h"
+#include "defines.h"
 
 typedef struct ivec2 {
     union {

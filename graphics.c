@@ -48,3 +48,22 @@ void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t posi
     SDL_Rect rect = get_rect(position, texture->size);
     SDL_RenderCopy(renderer, texture->handle, null, &rect);
 }
+
+texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture) {
+    SDL_assert(graphics_data->active_renderers < MAX_RENDERERS);
+    
+    texture_renderer_t *renderer = &graphics_data->renderers[graphics_data->active_renderers++];
+    renderer->texture = texture;
+    renderer->world_position = get_vec2(0, 0);
+    renderer->texture_region = texture->size;
+    return renderer;
+}
+
+void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
+    for (int i = 0; i < graphics_data->active_renderers; ++i) {
+        texture_renderer_t tex_renderer = graphics_data->renderers[i];
+        
+        ivec2_t draw_pos = sum_vec2(tex_renderer.world_position, graphics_data->camera.world_position); 
+        draw_texture(renderer, tex_renderer.texture, draw_pos);
+    }
+}

@@ -5,19 +5,12 @@
 #ifndef SDL_GAME_ENGINE_H
 #define SDL_GAME_ENGINE_H
 
-#include "SDL2/SDL.h"
-#include <inttypes.h>
+#include "defines.h"
+#include "graphics.h"
 
-#define ubyte uint8_t
-#define byte int8_t
-#define ushort uint16_t
-#define uint uint32_t
-#define ulong uint64_t
-
-#define true 1
-#define false 0
-#define bool int
-
-#define null NULL
+typedef struct engine_data {
+    graphics_data_t graphics_data;
+    
+} engine_data_t;
 
 #endif //SDL_GAME_ENGINE_H
