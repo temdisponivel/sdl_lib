@@ -28,7 +28,7 @@ int main(int handle, char** params) {
     texture.size = scale_vec2(texture.size, .3f);
     
     camera_t camera;
-    camera.world_position = get_vec2(50, 300);
+    camera.world_position = get_vec2(0, 0);
     graphics_data.camera = camera;
 
     for (int i = 0; i < 10; ++i) {
@@ -83,6 +83,8 @@ int main(int handle, char** params) {
 
             graphics_data.renderers[1].world_position = sum_vec2(graphics_data.renderers[1].world_position, to_add);
         }
+
+        graphics_data.renderers[0].world_position = input_data.mouse_pos;
 
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
