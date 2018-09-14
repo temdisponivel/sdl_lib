@@ -44,23 +44,47 @@ int main(int handle, char** params) {
         
         update_input_data(&input_data);
         
-        ivec2_t to_add = {};
-        int speed = 1;
-        
-        #define key_function is_key_holded
-        
-        if (key_function(&input_data, KEY_a)) {
-            to_add = get_vec2(-speed, 0);
-        } else if (key_function(&input_data, KEY_d)) {
-            to_add = get_vec2(speed, 0);
-        } else if (key_function(&input_data, KEY_w)) {
-            to_add = get_vec2(0, -speed);
-        } else if (key_function(&input_data, KEY_s)) {
-            to_add = get_vec2(0, speed);
-        }
+        {
+            ivec2_t to_add = {};
+            int speed = 1;
 
-        graphics_data.renderers[0].world_position = sum_vec2(graphics_data.renderers[0].world_position, to_add);
+#define key_function is_key_holded
+
+            //SDL_TriggerBreakpoint();
+            //bool right = is_modifier_on(&input_data, MODIFIER_ALT);
+            
+            if (key_function(&input_data, KEY_a) && is_modifier_on(&input_data, MODIFIER_ALT)) {
+                to_add = get_vec2(-speed, 0);
+            } else if (key_function(&input_data, KEY_d) && input_data.current_modifiers == MODIFIER_CTRL) {
+                to_add = get_vec2(speed, 0);
+            } else if (key_function(&input_data, KEY_w) && input_data.current_modifiers == (MODIFIER_ALT & MODIFIER_CTRL)) {
+                to_add = get_vec2(0, -speed);
+            } else if (key_function(&input_data, KEY_s) && input_data.current_modifiers == (MODIFIER_ALT & MODIFIER_SHIFT)) {
+                to_add = get_vec2(0, speed);
+            }
+
+            graphics_data.renderers[0].world_position = sum_vec2(graphics_data.renderers[0].world_position, to_add);
+        }
         
+        {
+            ivec2_t to_add = {};
+            int speed = 1;
+
+            speed += get_click_count(&input_data, BUTTON_LEFT);
+
+            #define button_function is_button_pressed
+            if (button_function(&input_data, BUTTON_LEFT)) {
+                to_add = get_vec2(-speed, 0);
+            } else if (button_function(&input_data, BUTTON_CENTER)) {
+                to_add = get_vec2(speed, 0);
+            } else if (button_function(&input_data, BUTTON_RIGHT)) {
+                to_add = get_vec2(0, speed);
+            }
+
+            if (speed > 2)
+                graphics_data.renderers[1].world_position = sum_vec2(graphics_data.renderers[1].world_position, to_add);
+        }        
+
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
         }

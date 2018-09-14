@@ -259,9 +259,24 @@ typedef enum {
 } KEY;
 
 typedef enum {
-    LEFT,
-    CENTER,
-    RIGHT,
+    MODIFIER_NONE = KMOD_NONE,
+    MODIFIER_NUM = KMOD_NUM,
+    MODIFIER_CAPS = KMOD_CAPS,
+    MODIFIER_LCTRL = KMOD_LCTRL,
+    MODIFIER_RCTRL = KMOD_RCTRL,
+    MODIFIER_RSHIFT = KMOD_RSHIFT,
+    MODIFIER_LSHIFT = KMOD_LSHIFT,
+    MODIFIER_RALT = KMOD_RALT,
+    MODIFIER_LALT = KMOD_LALT,
+    MODIFIER_CTRL = KMOD_CTRL,
+    MODIFIER_SHIFT = KMOD_SHIFT,
+    MODIFIER_ALT = KMOD_ALT,
+} MODIFIERS;
+
+typedef enum {
+    BUTTON_LEFT,
+    BUTTON_CENTER,
+    BUTTON_RIGHT,
     BUTTON_LAST
 } BUTTON;
 
@@ -270,11 +285,13 @@ typedef struct mouse_button_state {
     STATE state;
 } mouse_button_state_t;
 
-// TODO: Handle double click and FIX key/button states
+// TODO: Handle modifiers
 typedef struct input_data {
     // KEYBOARD
     STATE last_frame_keyboard[KEY_LAST - 1];
     STATE current_frame_keyboard[KEY_LAST - 1];
+    
+    MODIFIERS current_modifiers;
 
     // MISC
     bool quit_event_called;
@@ -297,6 +314,7 @@ void update_input_data(input_data_t *input_data);
 
 STATE get_key_state(input_data_t *input_data, KEY key);
 mouse_button_state_t get_button_state(input_data_t *input_data, BUTTON button);
+int get_click_count(input_data_t *input_data, BUTTON button);
 
 bool is_key_normal(input_data_t *input_data, KEY key);
 bool is_key_pressed(input_data_t *input_data, KEY key);
@@ -307,5 +325,7 @@ bool is_button_normal(input_data_t *input_data, BUTTON button);
 bool is_button_pressed(input_data_t *input_data, BUTTON button);
 bool is_button_holded(input_data_t *input_data, BUTTON button);
 bool is_button_released(input_data_t *input_data, BUTTON button);
+
+bool is_modifier_on(input_data_t *input_data, MODIFIERS modifier);
 
 #endif //SDL_GAME_INPUT_H
