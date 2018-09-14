@@ -43,22 +43,23 @@ int main(int handle, char** params) {
         start_frame(&time_data);
         
         update_input_data(&input_data);
-
-        for (int i = 0; i < KEY_LAST; ++i) {
-            STATE state = input_data.current_frame_keyboard[i];
-            if (state != STATE_NORMAL) {
-                SDL_Log("%i: %i", i, state);
-                    static int count = 0;
-                if (state == STATE_HOLDED) {
-                    if (count > 5) {
-                        input_data.quit_event_called = true;
-                    }
-                    count++;
-                } else {
-                    count = 0;
-                }
-            }
+        
+        ivec2_t to_add = {};
+        int speed = 1;
+        
+        #define key_function is_key_holded
+        
+        if (key_function(&input_data, KEY_a)) {
+            to_add = get_vec2(-speed, 0);
+        } else if (key_function(&input_data, KEY_d)) {
+            to_add = get_vec2(speed, 0);
+        } else if (key_function(&input_data, KEY_w)) {
+            to_add = get_vec2(0, -speed);
+        } else if (key_function(&input_data, KEY_s)) {
+            to_add = get_vec2(0, speed);
         }
+
+        graphics_data.renderers[0].world_position = sum_vec2(graphics_data.renderers[0].world_position, to_add);
         
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
@@ -75,7 +76,7 @@ int main(int handle, char** params) {
 
         end_frame(&time_data);
         
-        SDL_Log("FPS: %f", 1.f / time_data.dt);
+        //SDL_Log("FPS: %f", 1.f / time_data.dt);
     }
     
     return 0;

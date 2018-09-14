@@ -803,8 +803,8 @@ void handle_mouse_event(input_data_t *state, SDL_Event event) {
 void update_input_data(input_data_t *input_data) {
     // RESET
     memcpy(input_data->last_frame_keyboard, input_data->current_frame_keyboard, sizeof(input_data->current_frame_keyboard));
-    memset(input_data->current_frame_keyboard, 0, sizeof(input_data->current_frame_keyboard));
-
+    //memset(input_data->current_frame_keyboard, 0, sizeof(input_data->current_frame_keyboard));
+    
     input_data->quit_event_called = false;
     input_data->window_resized = false;
 
@@ -841,24 +841,40 @@ void update_input_data(input_data_t *input_data) {
                 break;
         }
     }
+/*
+    input_data->current_frame_keyboard[0] = STATE_PRESSED;
 
     // UPDATE FROM LAST TO CURRENT
 
     for (int i = 0; i < KEY_LAST; ++i) {
         STATE last_frame = input_data->last_frame_keyboard[i];
         STATE current_frame = input_data->current_frame_keyboard[i];
-        
-        SDL_assert(last_frame != STATE_HOLDED && current_frame != STATE_PRESSED);
 
         STATE final = combine_key_state(last_frame, current_frame);
+        
+        *//*
+        if (current_frame == STATE_PRESSED && last_frame == STATE_PRESSED) {
+            //SDL_TriggerBreakpoint();
+        }
+        
+        static bool check = false;
+               
+        if (check)
+            if (i == 0)
+                SDL_assert(final == STATE_HOLDED);
+
+        if (!check)
+            check = true;
+        *//*
         input_data->current_frame_keyboard[i] = final;
-    }
+    }*/
 }
 
 
 STATE get_key_state(input_data_t *input_data, KEY key) {
-    STATE state = input_data->current_frame_keyboard[key];
-    return state;
+    STATE last_state = input_data->last_frame_keyboard[key];
+    STATE current_state = input_data->current_frame_keyboard[key];
+    return combine_key_state(last_state, current_state);
 }
 
 mouse_button_state_t get_button_state(input_data_t *input_data, BUTTON button) {
