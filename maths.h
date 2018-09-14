@@ -7,28 +7,28 @@
 
 #include "defines.h"
 
-typedef struct ivec2 {
+typedef struct vec2 {
     union {
-        int x;
-        int width;
+        float x;
+        float width;
     };
-    
+
     union {
-        int y;
-        int height;
+        float y;
+        float height;
     };
-} ivec2_t;
+} vec2_t;
 
-ivec2_t get_vec2(int x, int h);
+vec2_t get_vec2(float x, float h);
 
-ivec2_t sum_vec2(ivec2_t a, ivec2_t b);
+vec2_t sum_vec2(vec2_t a, vec2_t b);
 
-ivec2_t sub_vec2(ivec2_t a, ivec2_t b);
+vec2_t sub_vec2(vec2_t a, vec2_t b);
 
-ivec2_t scale_vec2(ivec2_t vec, float scaler);
+vec2_t scale_vec2(vec2_t vec, float scaler);
 
-ivec2_t div_vec2(ivec2_t vec, float scaler);
+vec2_t div_vec2(vec2_t vec, float scaler);
 
-SDL_Rect get_rect(ivec2_t pos, ivec2_t size);
+SDL_Rect get_rect(vec2_t pos, vec2_t size);
 
 #endif //SDL_GAME_MATHS_H

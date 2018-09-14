@@ -285,11 +285,10 @@ typedef struct mouse_button_state {
     STATE state;
 } mouse_button_state_t;
 
-// TODO: Handle modifiers
 typedef struct input_data {
     // KEYBOARD
-    STATE last_frame_keyboard[KEY_LAST - 1];
-    STATE current_frame_keyboard[KEY_LAST - 1];
+    STATE last_frame_keyboard[KEY_LAST];
+    STATE current_frame_keyboard[KEY_LAST];
     
     MODIFIERS current_modifiers;
 
@@ -298,14 +297,14 @@ typedef struct input_data {
 
     // WINDOW
     bool window_resized;
-    ivec2_t window_new_size;
+    vec2_t window_new_size;
     
     // MOUSE    
-    ivec2_t mouse_pos;
-    ivec2_t mouse_delta;
+    vec2_t mouse_pos;
+    vec2_t mouse_delta;
     float mouse_scroll_delta;
-    mouse_button_state_t last_frame_buttons[BUTTON_LAST - 1];
-    mouse_button_state_t current_frame_buttons[BUTTON_LAST - 1];
+    mouse_button_state_t last_frame_buttons[BUTTON_LAST];
+    mouse_button_state_t current_frame_buttons[BUTTON_LAST];
 } input_data_t;
 
 KEY get_key_index(SDL_Keycode key);

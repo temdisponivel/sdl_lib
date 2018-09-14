@@ -44,7 +44,7 @@ void destroy_texture(texture_t *texture) {
     texture->handle = 0xBAAD;
 }
 
-void draw_texture(SDL_Renderer *renderer, const texture_t *texture, ivec2_t world_position) {
+void draw_texture(SDL_Renderer *renderer, const texture_t *texture, vec2_t world_position) {
     SDL_Rect rect = get_rect(world_position, texture->size);
     SDL_RenderCopy(renderer, texture->handle, null, &rect);
 }
@@ -63,7 +63,7 @@ void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
     for (int i = 0; i < graphics_data->active_renderers; ++i) {
         texture_renderer_t tex_renderer = graphics_data->renderers[i];
         
-        ivec2_t draw_pos = sum_vec2(tex_renderer.world_position, graphics_data->camera.world_position); 
+        vec2_t draw_pos = sum_vec2(tex_renderer.world_position, graphics_data->camera.world_position); 
         draw_texture(renderer, tex_renderer.texture, draw_pos);
     }
 }

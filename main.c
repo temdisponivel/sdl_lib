@@ -45,7 +45,7 @@ int main(int handle, char** params) {
         update_input_data(&input_data);
         
         {
-            ivec2_t to_add = {};
+            vec2_t to_add = {};
             int speed = 1;
 
 #define key_function is_key_holded
@@ -67,12 +67,12 @@ int main(int handle, char** params) {
         }
         
         {
-            ivec2_t to_add = {};
+            vec2_t to_add = {};
             int speed = 1;
 
             speed += get_click_count(&input_data, BUTTON_LEFT);
 
-            #define button_function is_button_pressed
+            #define button_function is_button_released
             if (button_function(&input_data, BUTTON_LEFT)) {
                 to_add = get_vec2(-speed, 0);
             } else if (button_function(&input_data, BUTTON_CENTER)) {
@@ -81,9 +81,8 @@ int main(int handle, char** params) {
                 to_add = get_vec2(0, speed);
             }
 
-            if (speed > 2)
-                graphics_data.renderers[1].world_position = sum_vec2(graphics_data.renderers[1].world_position, to_add);
-        }        
+            graphics_data.renderers[1].world_position = sum_vec2(graphics_data.renderers[1].world_position, to_add);
+        }
 
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
