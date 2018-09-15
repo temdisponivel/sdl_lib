@@ -6,6 +6,7 @@
 #define SDL_GAME_GRAPHICS_H
 
 #include "maths.h"
+#include "time.h"
 
 #define MAX_RENDERERS 64
 
@@ -14,6 +15,21 @@ typedef struct texture {
     SDL_Texture *handle;
     vec2_t size;
 } texture_t;
+
+typedef struct sprite {
+    texture_t *texture;
+    rect_t texture_region;
+} sprite_t;
+
+typedef struct sprite_animation {
+    sprite_t *sprites;
+    int sprite_count;
+    
+    float cycle_duration;
+    float current_time;
+    
+    bool loop;
+} sprite_animation_t;
 
 // TODO: Add normalized_pivot
 typedef struct texture_renderer {
@@ -54,5 +70,11 @@ void draw_texture_renderer(SDL_Renderer *renderer, const camera_t *camera, const
 texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture);
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
+
+int get_sprite_animation_frame_index(const sprite_animation_t *animation);
+
+void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *animation);
+
+void set_sprite_on_renderer(texture_renderer_t *renderer, const sprite_animation_t *animation);
 
 #endif //SDL_GAME_GRAPHICS_H

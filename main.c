@@ -37,6 +37,25 @@ int main(int handle, char** params) {
         tex_renderer->transform.scale = get_vec2(.3f, .3f);
     }
     
+    sprite_animation_t animation;
+    animation.sprites = malloc(sizeof(sprite_t) * 3);
+    animation.sprite_count = 3;
+    animation.cycle_duration = 5;
+    animation.loop = true;
+    
+    for (int j = 0; j < 3; ++j) {
+        sprite_t sprite;
+        sprite.texture = &texture;
+        
+        vec2_t size = get_vec2(texture.size.width / 3.f, texture.size.height);
+        vec2_t pos = size;
+        pos.x *= j;
+        pos.y = 0;
+        sprite.texture_region = get_rect(pos, size);
+        
+        animation.sprites[j] = sprite;
+    }
+    
     time_data.target_frame_rate = 60;
     
     while (!input_data.quit_event_called) {
@@ -94,6 +113,9 @@ int main(int handle, char** params) {
         //SDL_Log("Mouse pos: %i x %i | Mouse delta: %i x %i | Mouse scroll: %i", input_data.mouse_pos.x, input_data.mouse_pos.y, input_data.mouse_delta.x, input_data.mouse_delta.y, input_data.mouse_scroll_delta);
         
         SDL_RenderClear(renderer);
+        
+        update_sprite_animation(&time_data, &animation);
+        set_sprite_on_renderer(graphics_data.renderers, &animation);
         
         draw(renderer, &graphics_data);
         //draw_texture(renderer, &texture, get_vec2(10, 10));

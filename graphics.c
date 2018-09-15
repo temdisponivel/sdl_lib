@@ -4,6 +4,7 @@
 
 #include "engine.h"
 #include "graphics.h"
+#include "math.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -100,4 +101,28 @@ void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
         texture_renderer_t *tex_renderer = &graphics_data->renderers[i];
         draw_texture_renderer(renderer, &graphics_data->camera, tex_renderer);
     }
+}
+
+int get_sprite_animation_frame_index(const sprite_animation_t *animation) {
+    int frame_duration = (int) (animation->cycle_duration / animation->sprite_count);
+    int frame_index = (int) animation->current_time / frame_duration;
+    
+    if (animation->loop)
+        frame_index = frame_index % animation->sprite_count;
+    else if (frame_index >= animation->sprite_count)
+        frame_index = animation->sprite_count - 1;
+        
+    return frame_index;
+}
+
+void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *animation) {
+    animation->current_time += time_data->dt;
+}
+
+void set_sprite_on_renderer(texture_renderer_t *renderer, const sprite_animation_t *animation) {
+    int frame_index = get_sprite_animation_frame_index(animation);
+    SDL_assert(frame_index < animation->sprite_count);
+    sprite_t sprite = animation->sprites[frame_index];
+    renderer->texture = sprite.texture;
+    renderer->texture_region = sprite.texture_region;
 }
