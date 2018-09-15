@@ -53,7 +53,7 @@ typedef struct physics_data {
 
 collider_t *get_box_collider(physics_data_t *physics_data, int owner, vec2_t size);
 collider_t *get_circle_collider(physics_data_t *physics_data, int owner, float radius);
-void destroy_collider(physics_data_t *physics_data, collider_t *collider);
+void free_collider(physics_data_t *physics_data, collider_t *collider);
 
 bool validate_collision(const collider_t *collider_a, const collider_t *collider_b);
 

@@ -63,6 +63,14 @@ typedef struct circle {
     float radius;
 } circle_t;
 
+typedef struct interpolation {
+    float start;
+    float target;
+    
+    float duration;
+    float time;
+} interpolation_t;
+
 #define VEC2_ZERO get_vec2(0, 0)
 #define VEC2_ONE get_vec2(1, 1)
 #define VEC2_UP get_vec2(0, 1)
@@ -70,6 +78,9 @@ typedef struct circle {
 #define VEC2_LEFT get_vec2(-1, 0)
 #define VEC2_RIGHT get_vec2(1, 0)
 #define IDENTITY_TRANS get_trans(VEC2_ZERO, 0, VEC2_ONE)
+
+#define SQUARE(x) ((x) * (x))
+#define LERP(x, y, delta) (((x) * (1 - (delta))) + ((y) * (delta)))
 
 vec2_t get_vec2(float x, float h);
 
@@ -82,6 +93,14 @@ vec2_t scale_vec2(vec2_t vec, float scaler);
 vec2_t div_vec2(vec2_t vec, float scaler);
 
 vec2_t mul_vec2(vec2_t a, vec2_t b);
+
+float sqrd_magnitude_vec2(vec2_t vec);
+
+float magnitude_vec2(vec2_t a);
+
+float sqrd_distance_vec2(vec2_t a, vec2_t b);
+
+float distance_vec2(vec2_t a, vec2_t b);
 
 rect_t get_rect(vec2_t pos, vec2_t size);
 
@@ -108,5 +127,9 @@ bool collide_rects(rect_t box_a, rect_t box_b);
 bool collide_circles(circle_t circle_a, circle_t circle_b);
 
 bool collide_rect_circle(rect_t box, circle_t circle);
+
+float get_current_interpolation_value(const interpolation_t *interpolation);
+
+interpolation_t blank_interpolation();
 
 #endif //SDL_GAME_MATHS_H

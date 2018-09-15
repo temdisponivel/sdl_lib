@@ -29,6 +29,7 @@ typedef struct sprite_animation {
     float current_time;
     
     bool loop;
+    bool playing;
 } sprite_animation_t;
 
 typedef struct sprite_renderer {
@@ -83,7 +84,7 @@ void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const 
 
 sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture);
 
-void destroy_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer);
+void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer);
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
@@ -102,6 +103,10 @@ void create_sprite_animation_from_sheet(
 );
 
 int get_sprite_animation_frame_index(const sprite_animation_t *animation);
+
+void stop_animation(sprite_animation_t *animation);
+
+void reset_animation(sprite_animation_t *animation);
 
 void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *animation);
 

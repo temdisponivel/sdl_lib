@@ -1,0 +1,8 @@
+- fixes:
+    * fix circle collision or remove it
+    
+create a resource system to handle texture, sounds, etc
+    handle creation destruction of resources
+
+audio system using SDL_Mixer
+text-drawing using SDL_TTF

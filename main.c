@@ -4,6 +4,8 @@
 #include "input.h"
 #include "time.h"
 #include "physics.h"
+#include "SDL2/SDL_mixer.h"
+#include "audio.h"
 
 rect_t get_sprite_screen_region(sprite_renderer_t *tex_renderer) {
     vec2_t world_pos = tex_renderer->transform.world_pos;
@@ -39,6 +41,27 @@ int main(int handle, char** params) {
     input_data_t input_data = {};
     time_data_t time_data = {};
     physics_data_t physics_data = {};
+    audio_data_t audio_data =  {};
+    
+    bool inited = init_audio(&audio_data);
+    SDL_assert(inited);
+    
+    sound_t effect = load_sound_from_file("data/effect.wav", EFFECT);
+    sound_t music = load_sound_from_file("data/music.mp3", MUSIC);
+    
+    audio_source_t *source = get_audio_source(&audio_data, effect);
+    audio_source_t *music_source = get_audio_source(&audio_data, music);
+    
+    music_source->volume = 0;
+    fade_in_audio_source(music_source, 20);
+    
+    //source->loop = true;
+    //source->loop = false;
+    //source->volume = 0;
+    //fade_in_audio_source(source, 25);
+    //source->volume = .5;
+    
+    play_audio_source(music_source);
     
     time_data.time_scale = 1;
     
@@ -65,12 +88,13 @@ int main(int handle, char** params) {
         sprite_renderer_t *tex_renderer = get_sprite_renderer(&graphics_data, &texture);
         tex_renderer->transform.world_pos = get_vec2(0, 0);
         tex_renderer->transform.scale = get_vec2(.5f, .5f);
+        tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
         
         //colliders[i] = get_box_collider(&physics_data, i, get_vec2(320, 165));
         colliders[i] = get_circle_collider(&physics_data, i, 320);
     }
     
-    graphics_data.renderers[1].transform.world_pos = get_vec2(400, 300);
+    //graphics_data.renderers[1].transform.world_pos = get_vec2(400, 300);
     
     sprite_animation_t first_animation;
     create_sprite_animation_from_sheet(
@@ -104,24 +128,25 @@ int main(int handle, char** params) {
         
         {
             vec2_t to_add = {};
-            int speed = 1;
+            int speed = 100;
 
 #define key_function is_key_holded
 
             //SDL_TriggerBreakpoint();
             //bool right = is_modifier_on(&input_data, MODIFIER_ALT);
             
-            if (key_function(&input_data, KEY_a) && is_modifier_on(&input_data, MODIFIER_ALT)) {
+            if (key_function(&input_data, KEY_a)) {
                 to_add = get_vec2(-speed, 0);
-            } else if (key_function(&input_data, KEY_d) && input_data.current_modifiers == MODIFIER_CTRL) {
+            } else if (key_function(&input_data, KEY_d)) {
                 to_add = get_vec2(speed, 0);
-            } else if (key_function(&input_data, KEY_w) && input_data.current_modifiers == (MODIFIER_ALT & MODIFIER_CTRL)) {
+            } else if (key_function(&input_data, KEY_w)) {
                 to_add = get_vec2(0, -speed);
-            } else if (key_function(&input_data, KEY_s) && input_data.current_modifiers == (MODIFIER_ALT & MODIFIER_SHIFT)) {
+            } else if (key_function(&input_data, KEY_s)) {
                 to_add = get_vec2(0, speed);
             }
 
-            graphics_data.renderers[0].transform.world_pos = sum_vec2(graphics_data.renderers[0].transform.world_pos, to_add);
+            source->position = sum_vec2(source->position, to_add);
+            graphics_data.renderers[1].transform.world_pos = sum_vec2(graphics_data.renderers[1].transform.world_pos, to_add);
         }
         
         {
@@ -143,11 +168,31 @@ int main(int handle, char** params) {
             graphics_data.renderers[1].transform.world_pos = sum_vec2(graphics_data.renderers[1].transform.world_pos, to_add);
         }
         
+        if (is_key_pressed(&input_data, KEY_p)) {
+            if (music_source->playing)  
+                pause_audio_source(music_source);
+            else
+                resume_audio_source(music_source);
+        }
+        
+        if (is_key_pressed(&input_data, KEY_r)) {
+            reset_audio_source(music_source);
+        }
+        
+        if (is_key_pressed(&input_data, KEY_r)) {
+            reset_animation(&first_animation);
+        }
+
+        if (is_key_pressed(&input_data, KEY_p)) {
+            first_animation.playing = !first_animation.playing;
+        }
+        
         if (is_key_pressed(&input_data, KEY_BACKSPACE)) {
-            destroy_sprite_renderer(&graphics_data, graphics_data.renderers);
+            free_sprite_renderer(&graphics_data, graphics_data.renderers);
         }
 
         graphics_data.renderers[0].transform.world_pos = input_data.mouse_pos;
+        audio_data.listener.position = input_data.mouse_pos;
 
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
@@ -174,7 +219,13 @@ int main(int handle, char** params) {
             );
             
             colliders[i]->position = tex_rect.position;
-            colliders[i]->circle_radius = tex_rect.size.x;
+            //colliders[i]->box_size = tex_rect.size;
+            colliders[i]->circle_radius = tex_rect.size.y;
+            
+            if (colliders[i]->collision_count > 0)  {
+                if (!source->playing)
+                    play_audio_source(source);
+            }
         }
         
         update_physics_data(&physics_data);
@@ -182,7 +233,8 @@ int main(int handle, char** params) {
         draw(renderer, &graphics_data);
         //draw_texture(renderer, &texture, get_vec2(10, 10));
         draw_physics_debug(renderer, &physics_data);
-
+        update_audio_data(&audio_data, &time_data);
+        
         SDL_RenderPresent(renderer);
 
         end_frame(&time_data);

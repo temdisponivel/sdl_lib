@@ -94,7 +94,7 @@ sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t
     return renderer;
 }
 
-void destroy_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer) {
+void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer) {
     SDL_memmove(renderer, &graphics_data->renderers[graphics_data->renderers_count - 1], sizeof(sprite_renderer_t));
     graphics_data->renderers_count--;
 }
@@ -142,6 +142,7 @@ void create_sprite_animation_from_sheet(
     destination->loop = loop;
     destination->frame_count = frame_count;
     destination->current_time = 0;
+    destination->playing = true;
 
     for (int i = 0; i < frame_count; ++i) {
         destination->sprites[i].texture = sprite_sheet;
@@ -161,8 +162,19 @@ int get_sprite_animation_frame_index(const sprite_animation_t *animation) {
     return frame_index;
 }
 
+void stop_animation(sprite_animation_t *animation) {
+    animation->playing = false;
+    animation->current_time = 0;
+}
+
+void reset_animation(sprite_animation_t *animation) {
+    animation->current_time = 0;
+}
+
 void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *animation) {
-    animation->current_time += time_data->dt;
+    if (animation->playing) {
+        animation->current_time += time_data->dt;
+    }
 }
 
 void set_sprite_on_renderer(sprite_renderer_t *renderer, const sprite_animation_t *animation) {

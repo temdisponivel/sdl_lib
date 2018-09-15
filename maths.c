@@ -46,6 +46,25 @@ vec2_t mul_vec2(vec2_t a, vec2_t b) {
     return result;
 }
 
+float sqrd_magnitude_vec2(vec2_t vec) {
+    return (vec.x * vec.x + vec.y * vec.y);
+}
+
+float magnitude_vec2(vec2_t a) {
+    float sqrd_mag = sqrd_magnitude_vec2(a);
+    return SDL_sqrtf(sqrd_mag);
+}
+
+float sqrd_distance_vec2(vec2_t a, vec2_t b) {
+    vec2_t diff = sub_vec2(a, b);
+    return sqrd_magnitude_vec2(diff);
+}
+
+float distance_vec2(vec2_t a, vec2_t b) {
+    float sqrd_dist = sqrd_distance_vec2(a, b);
+    return SDL_sqrtf(sqrd_dist);
+}
+
 rect_t get_rect(vec2_t pos, vec2_t size) {
     rect_t rect;
     rect.position.x = pos.x;
@@ -68,13 +87,6 @@ vec2_t normalize_rect_point(rect_t rect, vec2_t point) {
     float x = point.x - rect.position.x;
     float y = point.y - rect.position.y;
     vec2_t normalized = get_vec2(x / rect.size.x, y / rect.size.y);
-    return normalized;
-}
-
-vec2_t normalized_circle_point(circle_t circle, vec2_t point) {
-    float x = point.x - circle.position.x;
-    float y = point.y - circle.position.y;
-    vec2_t normalized = get_vec2(x / circle.radius, y / circle.radius);
     return normalized;
 }
 
@@ -164,17 +176,22 @@ bool collide_rects(rect_t box_a, rect_t box_b) {
 }
 
 bool collide_circles(circle_t circle_a, circle_t circle_b) {
-    vec2_t normalized_b_to_a = normalized_circle_point(circle_a, circle_b.position);
-    if (normalized_b_to_a.x < -1 || normalized_b_to_a.x > 1) {
-        return false;
-    } else if (normalized_b_to_a.y < -1 || normalized_b_to_a.y > 1) {
-        return false;
-    } else {
-        return true;
-    }
+    float distance = sqrd_distance_vec2(circle_a.position, circle_b.position);
+    float sqrd_radius = SQUARE(circle_a.radius + circle_b.radius);
+    return (distance <= sqrd_radius);
 }
 
 bool collide_rect_circle(rect_t box, circle_t circle) {
     rect_t circle_rect = get_rect(circle.position, get_vec2(circle.radius, circle.radius));
     return collide_rects(box, circle_rect);
+}
+
+float get_current_interpolation_value(const interpolation_t *interpolation) {
+    float delta = interpolation->time / interpolation->duration;
+    return LERP(interpolation->start, interpolation->target, delta);
+}
+
+interpolation_t blank_interpolation() {
+    interpolation_t result = {};
+    return result;
 }

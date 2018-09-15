@@ -35,7 +35,7 @@ collider_t *get_circle_collider(physics_data_t *physics_data, int owner, float r
     return collider;
 }
 
-void destroy_collider(physics_data_t *physics_data, collider_t *collider) {
+void free_collider(physics_data_t *physics_data, collider_t *collider) {
     SDL_memmove(collider, &physics_data->colliders[physics_data->colliders_count - 1], sizeof(collider_t));
     physics_data->colliders_count--;
 }
@@ -104,7 +104,7 @@ void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider) {
         SDL_Rect sdl_rect = convert_rect(rect);
         SDL_RenderDrawRect(renderer, &sdl_rect);
     } else {
-#define POINTS_COUNT 360
+        #define POINTS_COUNT 360
 
         SDL_Point points[POINTS_COUNT];
 
