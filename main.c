@@ -25,36 +25,41 @@ int main(int handle, char** params) {
         
     texture_t texture;
     load_texture_from_file("data/image.png", renderer, &texture);
-    //texture.size = scale_vec2(texture.size, .3f);
+    
+    texture_t texture_sheet;
+    load_texture_from_file("data/sheet.png", renderer, &texture_sheet);
     
     camera_t camera;
     camera.transform.world_pos = get_vec2(0, 0);
     graphics_data.camera = camera;
 
-    for (int i = 0; i < 10; ++i) {
-        texture_renderer_t *tex_renderer = create_texture_renderer(&graphics_data, &texture);
-        tex_renderer->transform.world_pos = get_vec2(i * texture.size.x, 0);
-        tex_renderer->transform.scale = get_vec2(.3f, .3f);
+    for (int i = 0; i < 2; ++i) {
+        sprite_renderer_t *tex_renderer = create_sprite_renderer(&graphics_data, &texture);
+        tex_renderer->transform.world_pos = get_vec2(0, 0);
+        tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_TOP_LEFT);
     }
     
-    sprite_animation_t animation;
-    animation.sprites = malloc(sizeof(sprite_t) * 3);
-    animation.sprite_count = 3;
-    animation.cycle_duration = 5;
-    animation.loop = true;
-    
-    for (int j = 0; j < 3; ++j) {
-        sprite_t sprite;
-        sprite.texture = &texture;
-        
-        vec2_t size = get_vec2(texture.size.width / 3.f, texture.size.height);
-        vec2_t pos = size;
-        pos.x *= j;
-        pos.y = 0;
-        sprite.texture_region = get_rect(pos, size);
-        
-        animation.sprites[j] = sprite;
-    }
+    sprite_animation_t first_animation;
+    create_sprite_animation_from_sheet(
+            &texture_sheet,
+            get_vec2(320, 330),
+            12,
+            30,
+            2,
+            true,
+            &first_animation
+    );
+
+    sprite_animation_t second_animation;
+    create_sprite_animation_from_sheet(
+            &texture_sheet,
+            get_vec2(320, 330),
+            0,
+            11,
+            1,
+            false,
+            &second_animation
+    );
     
     time_data.target_frame_rate = 60;
     
@@ -114,8 +119,11 @@ int main(int handle, char** params) {
         
         SDL_RenderClear(renderer);
         
-        update_sprite_animation(&time_data, &animation);
-        set_sprite_on_renderer(graphics_data.renderers, &animation);
+        update_sprite_animation(&time_data, &first_animation);
+        set_sprite_on_renderer(&graphics_data.renderers[0], &first_animation);
+
+        update_sprite_animation(&time_data, &second_animation);
+        set_sprite_on_renderer(&graphics_data.renderers[1], &second_animation);
         
         draw(renderer, &graphics_data);
         //draw_texture(renderer, &texture, get_vec2(10, 10));

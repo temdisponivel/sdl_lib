@@ -9,7 +9,7 @@
 #include "time.h"
 
 #define MAX_RENDERERS 64
-
+#define MAX_SPRITES_ON_ANIMATOR 32
 
 typedef struct texture {
     SDL_Texture *handle;
@@ -22,8 +22,8 @@ typedef struct sprite {
 } sprite_t;
 
 typedef struct sprite_animation {
-    sprite_t *sprites;
-    int sprite_count;
+    sprite_t sprites[MAX_SPRITES_ON_ANIMATOR];
+    int frame_count;
     
     float cycle_duration;
     float current_time;
@@ -31,14 +31,13 @@ typedef struct sprite_animation {
     bool loop;
 } sprite_animation_t;
 
-// TODO: Add normalized_pivot
-typedef struct texture_renderer {
-    texture_t *texture;
+typedef struct sprite_renderer {
+    sprite_t sprite;
+    
     transform_t transform;
     vec2_t normalized_pivot;
 
-    rect_t texture_region;
-} texture_renderer_t;
+} sprite_renderer_t;
 
 // TODO: Create an animator system
 
@@ -48,7 +47,7 @@ typedef struct camera {
 
 typedef struct graphics_data {
     camera_t camera;
-    texture_renderer_t renderers[MAX_RENDERERS];
+    sprite_renderer_t renderers[MAX_RENDERERS];
     uint active_renderers;
 } graphics_data_t;
 
@@ -65,16 +64,30 @@ void draw_texture_ex(
         const texture_t *texture
 );
 
-void draw_texture_renderer(SDL_Renderer *renderer, const camera_t *camera, const texture_renderer_t *tex_renderer);
+void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const sprite_renderer_t *tex_renderer);
 
-texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture);
+sprite_renderer_t *create_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture);
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
+
+sprite_t create_sprite(texture_t *texture, rect_t region);
+
+// SPRITE ANIMATION
+
+void create_sprite_animation_from_sheet(
+        texture_t *sprite_sheet,
+        vec2_t sprite_size,
+        int start_frame,
+        int frame_count,
+        int cycle_duration,
+        bool loop,
+        sprite_animation_t *destination
+);
 
 int get_sprite_animation_frame_index(const sprite_animation_t *animation);
 
 void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *animation);
 
-void set_sprite_on_renderer(texture_renderer_t *renderer, const sprite_animation_t *animation);
+void set_sprite_on_renderer(sprite_renderer_t *renderer, const sprite_animation_t *animation);
 
 #endif //SDL_GAME_GRAPHICS_H

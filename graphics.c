@@ -31,8 +31,8 @@ void load_texture_from_file(const char* file_path, SDL_Renderer *renderer, textu
     SDL_assert(!fail);
     
     // Enable blending for texture with alpha channels
-    //if (channels > 3)
-    //  SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    if (channels > 3)
+      SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
     stbi_image_free(data);
 
@@ -61,7 +61,7 @@ void draw_texture_ex(
     SDL_RenderCopyEx(renderer, texture->handle, &source_rect, &sdl_dest_rect, angle, &sdl_pivot, SDL_FLIP_NONE);
 }
 
-void draw_texture_renderer(SDL_Renderer *renderer, const camera_t *camera, const texture_renderer_t* tex_renderer) {
+void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const sprite_renderer_t *tex_renderer) {
     vec2_t world_pos;
     float angle;
     rect_t tex_region;
@@ -73,44 +73,86 @@ void draw_texture_renderer(SDL_Renderer *renderer, const camera_t *camera, const
     world_pos = sub_vec2(world_pos, camera->transform.world_pos);
     angle = angle - camera->transform.angle;
     
-    tex_region = tex_renderer->texture_region;
+    tex_region = tex_renderer->sprite.texture_region;
 
-    vec2_t screen_size = mul_vec2(tex_renderer->texture_region.size, tex_renderer->transform.scale);
+    vec2_t screen_size = mul_vec2(tex_renderer->sprite.texture_region.size, tex_renderer->transform.scale);
     
     pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), tex_renderer->normalized_pivot);
     world_pos = sub_vec2(world_pos, pivot);
     
     rect_t screen_region = get_rect(world_pos, screen_size);
     
-    draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->texture);    
+    draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->sprite.texture);    
 }
 
-texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture) {
+sprite_renderer_t *create_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture) {
     SDL_assert(graphics_data->active_renderers < MAX_RENDERERS);
     
-    texture_renderer_t *renderer = &graphics_data->renderers[graphics_data->active_renderers++];
-    renderer->texture = texture;
+    sprite_renderer_t *renderer = &graphics_data->renderers[graphics_data->active_renderers++];
+    renderer->sprite = create_sprite(texture, get_rect(VEC2_ZERO, texture->size));
     renderer->transform = IDENTITY_TRANS;
-    renderer->texture_region = get_rect(VEC2_ZERO, texture->size);
     renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
     return renderer;
 }
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
     for (int i = 0; i < graphics_data->active_renderers; ++i) {
-        texture_renderer_t *tex_renderer = &graphics_data->renderers[i];
-        draw_texture_renderer(renderer, &graphics_data->camera, tex_renderer);
+        sprite_renderer_t *tex_renderer = &graphics_data->renderers[i];
+        draw_sprite_renderer(renderer, &graphics_data->camera, tex_renderer);
+    }
+}
+
+sprite_t create_sprite(texture_t *texture, rect_t region) {
+    sprite_t sprite;
+    sprite.texture = texture;
+    sprite.texture_region = region;
+    return sprite;
+}
+
+
+rect_t get_texture_frame(texture_t *texture, vec2_t frame_size, int frame_index) {
+    
+    int texture_columns = (int) (texture->size.width / frame_size.width);
+    int texture_rows = (int) (texture->size.height / frame_size.height);
+    
+    int column = frame_index % texture_columns;
+    int row = frame_index / texture_columns;
+    
+    row = (int) fminf(row, texture_rows);
+    
+    vec2_t pos = get_vec2(column, row);
+    pos = mul_vec2(pos, frame_size);
+    return get_rect(pos, frame_size);
+}
+
+void create_sprite_animation_from_sheet(
+        texture_t *sprite_sheet,
+        vec2_t sprite_size,
+        int start_frame,
+        int frame_count,
+        int cycle_duration,
+        bool loop,
+        sprite_animation_t *destination
+) { 
+    destination->cycle_duration = cycle_duration;
+    destination->loop = loop;
+    destination->frame_count = frame_count;
+    destination->current_time = 0;
+    
+    for (int i = 0; i < frame_count; ++i) {
+        destination->sprites[i].texture = sprite_sheet;
+        destination->sprites[i].texture_region = get_texture_frame(sprite_sheet, sprite_size, start_frame + i);
     }
 }
 
 int get_sprite_animation_frame_index(const sprite_animation_t *animation) {
-    int frame_duration = (int) (animation->cycle_duration / animation->sprite_count);
-    int frame_index = (int) animation->current_time / frame_duration;
+    float frame_duration = (animation->cycle_duration / animation->frame_count);
+    int frame_index = (int) (animation->current_time / frame_duration);
     
     if (animation->loop)
-        frame_index = frame_index % animation->sprite_count;
-    else if (frame_index >= animation->sprite_count)
-        frame_index = animation->sprite_count - 1;
+        frame_index = frame_index % animation->frame_count;
+    else if (frame_index >= animation->frame_count)
+        frame_index = animation->frame_count - 1;
         
     return frame_index;
 }
@@ -119,10 +161,9 @@ void update_sprite_animation(const time_data_t *time_data, sprite_animation_t *a
     animation->current_time += time_data->dt;
 }
 
-void set_sprite_on_renderer(texture_renderer_t *renderer, const sprite_animation_t *animation) {
+void set_sprite_on_renderer(sprite_renderer_t *renderer, const sprite_animation_t *animation) {
     int frame_index = get_sprite_animation_frame_index(animation);
-    SDL_assert(frame_index < animation->sprite_count);
+    SDL_assert(frame_index < animation->frame_count);
     sprite_t sprite = animation->sprites[frame_index];
-    renderer->texture = sprite.texture;
-    renderer->texture_region = sprite.texture_region;
+    renderer->sprite = sprite;
 }
