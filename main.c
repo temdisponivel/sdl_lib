@@ -3,6 +3,29 @@
 #include "maths.h"
 #include "input.h"
 #include "time.h"
+#include "physics.h"
+
+rect_t get_sprite_screen_region(sprite_renderer_t *tex_renderer) {
+    vec2_t world_pos = tex_renderer->transform.world_pos;
+
+    vec2_t screen_size = mul_vec2(tex_renderer->sprite.texture_region.size, tex_renderer->transform.scale);
+
+    vec2_t pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), tex_renderer->normalized_pivot);
+    world_pos = sub_vec2(world_pos, pivot);
+
+    rect_t screen_region = get_rect(world_pos, screen_size);
+    return screen_region;
+}
+
+circle_t get_sprite_screen_circle(sprite_renderer_t *tex_renderer) {
+    rect_t screen_region = get_sprite_screen_region(tex_renderer);
+    circle_t circle;
+    circle.position = screen_region.position;
+    
+    vec2_t squared = mul_vec2(screen_region.size, screen_region.size);
+    circle.radius = screen_region.size.x;// SDL_sqrtf(squared.x + squared.y);
+    return circle;
+}
 
 int main(int handle, char** params) {
     int result = SDL_Init(SDL_INIT_EVERYTHING);
@@ -15,6 +38,7 @@ int main(int handle, char** params) {
     graphics_data_t graphics_data = {};
     input_data_t input_data = {};
     time_data_t time_data = {};
+    physics_data_t physics_data = {};
     
     time_data.time_scale = 1;
     
@@ -33,10 +57,16 @@ int main(int handle, char** params) {
     camera.transform.world_pos = get_vec2(0, 0);
     graphics_data.camera = camera;
 
-    for (int i = 0; i < 2; ++i) {
-        sprite_renderer_t *tex_renderer = create_sprite_renderer(&graphics_data, &texture);
+#define ENTITY_COUNT 2
+    
+    collider_t *colliders[ENTITY_COUNT];
+
+    for (int i = 0; i < ENTITY_COUNT; ++i) {
+        sprite_renderer_t *tex_renderer = get_sprite_renderer(&graphics_data, &texture);
         tex_renderer->transform.world_pos = get_vec2(0, 0);
-        tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_TOP_LEFT);
+        tex_renderer->transform.scale = get_vec2(.5f, .5f);
+        
+        colliders[i] = get_box_collider(&physics_data, i, get_vec2(160, 165));
     }
     
     sprite_animation_t first_animation;
@@ -97,8 +127,9 @@ int main(int handle, char** params) {
 
             speed += get_click_count(&input_data, BUTTON_LEFT);
 
-            #define button_function is_button_released
+            #define button_function is_button_holded
             if (button_function(&input_data, BUTTON_LEFT)) {
+                graphics_data.renderers[0].transform.angle++;
                 to_add = get_vec2(-speed, 0);
             } else if (button_function(&input_data, BUTTON_CENTER)) {
                 to_add = get_vec2(speed, 0);
@@ -108,6 +139,10 @@ int main(int handle, char** params) {
 
             graphics_data.renderers[1].transform.world_pos = sum_vec2(graphics_data.renderers[1].transform.world_pos, to_add);
         }
+        
+        if (is_key_pressed(&input_data, KEY_BACKSPACE)) {
+            destroy_sprite_renderer(&graphics_data, graphics_data.renderers);
+        }
 
         graphics_data.renderers[0].transform.world_pos = input_data.mouse_pos;
 
@@ -116,7 +151,8 @@ int main(int handle, char** params) {
         }
         
         //SDL_Log("Mouse pos: %i x %i | Mouse delta: %i x %i | Mouse scroll: %i", input_data.mouse_pos.x, input_data.mouse_pos.y, input_data.mouse_delta.x, input_data.mouse_delta.y, input_data.mouse_scroll_delta);
-        
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         
         update_sprite_animation(&time_data, &first_animation);
@@ -124,9 +160,25 @@ int main(int handle, char** params) {
 
         update_sprite_animation(&time_data, &second_animation);
         set_sprite_on_renderer(&graphics_data.renderers[1], &second_animation);
+
+        for (int i = 0; i < ENTITY_COUNT; ++i) {
+            sprite_renderer_t tex_render = graphics_data.renderers[i]; 
+            rect_t tex_rect = calculate_rect(
+                    tex_render.transform.world_pos, 
+                    tex_render.sprite.texture_region.size, 
+                    tex_render.transform.scale, 
+                    tex_render.normalized_pivot
+            );
+            
+            colliders[i]->position = tex_rect.position;
+            colliders[i]->box_size = tex_rect.size;
+        }
+        
+        update_physics_data(&physics_data);
         
         draw(renderer, &graphics_data);
         //draw_texture(renderer, &texture, get_vec2(10, 10));
+        draw_physics_debug(renderer, &physics_data);
 
         SDL_RenderPresent(renderer);
 

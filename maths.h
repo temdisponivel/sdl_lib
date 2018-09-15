@@ -41,6 +41,9 @@ typedef struct vec2 {
 } vec2_t;
 
 // TODO: Add parents
+// TODO: Make all transforms be reference by pointers
+// so that when we change a transform in one component, all
+// others will see the change
 typedef struct transform {
     vec2_t world_pos;
     union {
@@ -54,6 +57,11 @@ typedef struct rect {
     vec2_t position;
     vec2_t size;
 } rect_t;
+
+typedef struct circle {
+    vec2_t position;
+    float radius;
+} circle_t;
 
 #define VEC2_ZERO get_vec2(0, 0)
 #define VEC2_ONE get_vec2(1, 1)
@@ -85,10 +93,20 @@ vec2_t denormalize_rect_point(rect_t rect, vec2_t point);
 
 vec2_t get_rect_pivot(rect_t rect, PIVOT pivot);
 
+rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
+
 vec2_t get_normalized_pivot_point(PIVOT pivot);
 
 SDL_Point convert_vec2(vec2_t vec);
 
 transform_t get_trans(vec2_t pos, float angle, vec2_t scale);
+
+circle_t get_circle(vec2_t pos, float radius);
+
+bool collide_rects(rect_t box_a, rect_t box_b);
+
+bool collide_circles(circle_t circle_a, circle_t circle_b);
+
+bool collide_rect_circle(rect_t box, circle_t circle);
 
 #endif //SDL_GAME_MATHS_H

@@ -10,7 +10,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 set(PLATAFORM x86_64)
 
-add_executable(sdl_game main.c graphics.h maths.h maths.c graphics.c engine.h input_system.h defines.h input.h input.c time.h time.c)
+add_executable(sdl_game main.c graphics.h maths.h maths.c graphics.c engine.h input_system.h defines.h input.h input.c time.h time.c physics.h physics.c)
 target_link_libraries(sdl_game "-L${DEPS_FOLDER}/lib/${PLATAFORM}/ -lmingw32 -lSDL2main -lSDL2")
 file(COPY "${DEPS_FOLDER}/bin/${PLATAFORM}/" DESTINATION .)
 file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION .)
