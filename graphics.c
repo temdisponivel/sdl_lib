@@ -44,37 +44,44 @@ void destroy_texture(texture_t *texture) {
     texture->handle = 0xBAAD;
 }
 
-void draw_texture(SDL_Renderer *renderer, const texture_t *texture, vec2_t world_position) {
-    SDL_Rect rect = get_rect(world_position, texture->size);
-    SDL_RenderCopy(renderer, texture->handle, null, &rect);
+void draw_texture_ex(
+        SDL_Renderer *renderer, 
+        rect_t screen_region, 
+        float angle, 
+        rect_t texture_region,
+        vec2_t pivot,
+        const texture_t *texture
+) {
+    SDL_Rect source_rect = convert_rect(texture_region);
+    SDL_Rect sdl_dest_rect = convert_rect(screen_region);
+    
+    SDL_Point sdl_pivot = convert_vec2(pivot);
+    
+    SDL_RenderCopyEx(renderer, texture->handle, &source_rect, &sdl_dest_rect, angle, &sdl_pivot, SDL_FLIP_NONE);
 }
 
-vec2_t get_pivot_point(vec2_t region, TEXTURE_PIVOT pivot) {
-    float x = 0;
-    float y = 0;
+void draw_texture_renderer(SDL_Renderer *renderer, const camera_t *camera, const texture_renderer_t* tex_renderer) {
+    vec2_t world_pos;
+    float angle;
+    rect_t tex_region;
+    vec2_t pivot;
     
-    if ((pivot & PIVOT_CENTER) != 0) {
-        x = region.x / 2.f;
-        y = region.y / 2.f;
-    }
+    world_pos = tex_renderer->transform.world_pos;
+    angle = tex_renderer->transform.angle;
+    
+    world_pos = sub_vec2(world_pos, camera->transform.world_pos);
+    angle = angle - camera->transform.angle;
+    
+    tex_region = tex_renderer->texture_region;
 
-    if ((pivot & PIVOT_BOTTOM) != 0) {
-        y = region.height;
-    }
-
-    if ((pivot & PIVOT_TOP) != 0) {
-        y = 0;
-    }
+    vec2_t screen_size = mul_vec2(tex_renderer->texture_region.size, tex_renderer->transform.scale);
     
-    if ((pivot & PIVOT_LEFT) != 0) {
-        x = 0;
-    }
+    pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), tex_renderer->normalized_pivot);
+    world_pos = sub_vec2(world_pos, pivot);
     
-    if ((pivot & PIVOT_RIGHT) != 0) {
-        x = region.width;
-    }
+    rect_t screen_region = get_rect(world_pos, screen_size);
     
-    return get_vec2(x, y);
+    draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->texture);    
 }
 
 texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, texture_t *texture) {
@@ -82,19 +89,15 @@ texture_renderer_t *create_texture_renderer(graphics_data_t *graphics_data, text
     
     texture_renderer_t *renderer = &graphics_data->renderers[graphics_data->active_renderers++];
     renderer->texture = texture;
-    renderer->world_position = get_vec2(0, 0);
-    renderer->texture_region = texture->size;
-    renderer->pivot = get_pivot_point(renderer->texture_region, PIVOT_CENTER);
+    renderer->transform = IDENTITY_TRANS;
+    renderer->texture_region = get_rect(VEC2_ZERO, texture->size);
+    renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
     return renderer;
 }
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
     for (int i = 0; i < graphics_data->active_renderers; ++i) {
-        texture_renderer_t tex_renderer = graphics_data->renderers[i];
-        
-        vec2_t draw_pos = sum_vec2(tex_renderer.world_position, graphics_data->camera.world_position);
-
-        draw_pos = sub_vec2(draw_pos, tex_renderer.pivot);
-        draw_texture(renderer, tex_renderer.texture, draw_pos);
+        texture_renderer_t *tex_renderer = &graphics_data->renderers[i];
+        draw_texture_renderer(renderer, &graphics_data->camera, tex_renderer);
     }
 }

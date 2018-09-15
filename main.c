@@ -25,15 +25,16 @@ int main(int handle, char** params) {
         
     texture_t texture;
     load_texture_from_file("data/image.png", renderer, &texture);
-    texture.size = scale_vec2(texture.size, .3f);
+    //texture.size = scale_vec2(texture.size, .3f);
     
     camera_t camera;
-    camera.world_position = get_vec2(0, 0);
+    camera.transform.world_pos = get_vec2(0, 0);
     graphics_data.camera = camera;
 
     for (int i = 0; i < 10; ++i) {
         texture_renderer_t *tex_renderer = create_texture_renderer(&graphics_data, &texture);
-        tex_renderer->world_position = get_vec2(i * texture.size.x, 0);
+        tex_renderer->transform.world_pos = get_vec2(i * texture.size.x, 0);
+        tex_renderer->transform.scale = get_vec2(.3f, .3f);
     }
     
     time_data.target_frame_rate = 60;
@@ -63,7 +64,7 @@ int main(int handle, char** params) {
                 to_add = get_vec2(0, speed);
             }
 
-            graphics_data.renderers[0].world_position = sum_vec2(graphics_data.renderers[0].world_position, to_add);
+            graphics_data.renderers[0].transform.world_pos = sum_vec2(graphics_data.renderers[0].transform.world_pos, to_add);
         }
         
         {
@@ -81,10 +82,10 @@ int main(int handle, char** params) {
                 to_add = get_vec2(0, speed);
             }
 
-            graphics_data.renderers[1].world_position = sum_vec2(graphics_data.renderers[1].world_position, to_add);
+            graphics_data.renderers[1].transform.world_pos = sum_vec2(graphics_data.renderers[1].transform.world_pos, to_add);
         }
 
-        graphics_data.renderers[0].world_position = input_data.mouse_pos;
+        graphics_data.renderers[0].transform.world_pos = input_data.mouse_pos;
 
         if (input_data.window_resized) {
             SDL_Log("New size: %i x %i", input_data.window_new_size.x, input_data.window_new_size.y); 
