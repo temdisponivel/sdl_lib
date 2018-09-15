@@ -66,8 +66,11 @@ int main(int handle, char** params) {
         tex_renderer->transform.world_pos = get_vec2(0, 0);
         tex_renderer->transform.scale = get_vec2(.5f, .5f);
         
-        colliders[i] = get_box_collider(&physics_data, i, get_vec2(160, 165));
+        //colliders[i] = get_box_collider(&physics_data, i, get_vec2(320, 165));
+        colliders[i] = get_circle_collider(&physics_data, i, 320);
     }
+    
+    graphics_data.renderers[1].transform.world_pos = get_vec2(400, 300);
     
     sprite_animation_t first_animation;
     create_sprite_animation_from_sheet(
@@ -171,7 +174,7 @@ int main(int handle, char** params) {
             );
             
             colliders[i]->position = tex_rect.position;
-            colliders[i]->box_size = tex_rect.size;
+            colliders[i]->circle_radius = tex_rect.size.x;
         }
         
         update_physics_data(&physics_data);

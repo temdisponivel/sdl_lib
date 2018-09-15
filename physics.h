@@ -8,15 +8,13 @@
 #include "maths.h"
 
 #define MAX_COLLIDERS 128
-#define MAX_COLLISIONS MAX_COLLIDERS * MAX_COLLIDERS
-#define WORLD_AREAS 4
 #define MAX_COLLISIONS_PER_COLLIDER 16
 
 typedef enum {
-    TOP_LEFT_AREA,
-    TOP_RIGHT_AREA,
-    BOTTOM_LEFT_AREA,
-    BOTTOM_RIGHT_AREA,
+    TOP_LEFT_AREA = 1 << 0,
+    TOP_RIGHT_AREA = 1 << 1,
+    BOTTOM_LEFT_AREA = 1 << 2,
+    BOTTOM_RIGHT_AREA = 1 << 3,
 } WORLD_AREA;
 
 typedef enum {
@@ -47,16 +45,10 @@ typedef struct collider {
     int collision_count;
 } collider_t;
 
-typedef struct world_area {
-    collider_t *colliders[MAX_COLLIDERS];
-    int colliders_count;
-} world_area_t;
-
+// TODO: Add areas to better performance (octree or something)
 typedef struct physics_data {
     collider_t colliders[MAX_COLLIDERS];
     int colliders_count;
-
-    world_area_t areas[WORLD_AREAS];
 } physics_data_t;
 
 collider_t *get_box_collider(physics_data_t *physics_data, int owner, vec2_t size);
