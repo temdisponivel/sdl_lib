@@ -12,11 +12,11 @@ set(PLATAFORM x86_64)
 
 if(STATIC_LINKING)
     
-    set(LINK_FLAGS "-L${DEPS_FOLDER}/lib/${PLATAFORM}/static -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer -mwindows -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc")
+    set(LINK_FLAGS "-L${DEPS_FOLDER}/lib/${PLATAFORM}/static -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer -lSDL2_ttf -mwindows -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc")
     
 else()
     
-    set(LINK_FLAGS "-L${DEPS_FOLDER}/lib/${PLATAFORM}/dinamic -lmingw32 -lSDL2main -lSDL2.dll -lSDL2_mixer.dll")
+    set(LINK_FLAGS "-L${DEPS_FOLDER}/lib/${PLATAFORM}/dinamic -lmingw32 -lSDL2main -lSDL2.dll -lSDL2_mixer.dll -lSDL2_ttf.dll")
     
 endif()
 
