@@ -7,7 +7,6 @@
 
 #include "defines.h"
 
-
 typedef enum {
     PIVOT_CENTER = 1 << 0,
     PIVOT_BOTTOM = 1 << 1,
@@ -45,7 +44,7 @@ typedef struct vec2 {
 // so that when we change a transform in one component, all
 // others will see the change
 typedef struct transform {
-    vec2_t world_pos;
+    vec2_t position;
     union {
         float clockwise_angle;
         float angle;
@@ -79,8 +78,13 @@ typedef struct interpolation {
 #define VEC2_RIGHT get_vec2(1, 0)
 #define IDENTITY_TRANS get_trans(VEC2_ZERO, 0, VEC2_ONE)
 
+#define PI 3.14159265359
+#define TAU 2 * PI
+
 #define SQUARE(x) ((x) * (x))
 #define LERP(x, y, delta) (((x) * (1 - (delta))) + ((y) * (delta)))
+#define RADIANS(degrees) (((degrees) / 180.f) * PI)
+#define DEGREES(radians)  ((180.f / PI) * (radians))  
 
 vec2_t get_vec2(float x, float h);
 
@@ -112,11 +116,7 @@ SDL_Rect convert_rect(rect_t rect);
 
 vec2_t normalize_rect_point(rect_t rect, vec2_t point);
 
-vec2_t denormalize_rect_point(rect_t rect, vec2_t point);
-
-rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
-
-vec2_t get_pivot_point(rect_t rect, PIVOT pivot);
+vec2_t denormalize_point(vec2_t region, vec2_t point);
 
 vec2_t get_normalized_pivot_point(PIVOT pivot);
 

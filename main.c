@@ -10,28 +10,6 @@
 #include "gui.h"
 #include "stdio.h"
 
-rect_t get_sprite_screen_region(sprite_renderer_t *tex_renderer) {
-    vec2_t world_pos = tex_renderer->transform.world_pos;
-
-    vec2_t screen_size = mul_vec2(tex_renderer->sprite.texture_region.size, tex_renderer->transform.scale);
-
-    vec2_t pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), tex_renderer->normalized_pivot);
-    world_pos = sub_vec2(world_pos, pivot);
-
-    rect_t screen_region = get_rect(world_pos, screen_size);
-    return screen_region;
-}
-
-circle_t get_sprite_screen_circle(sprite_renderer_t *tex_renderer) {
-    rect_t screen_region = get_sprite_screen_region(tex_renderer);
-    circle_t circle;
-    circle.position = screen_region.position;
-
-    vec2_t squared = mul_vec2(screen_region.size, screen_region.size);
-    circle.radius = screen_region.size.x;// SDL_sqrtf(squared.x + squared.y);
-    return circle;
-}
-
 int main(int handle, char **params) {
     int result = SDL_Init(SDL_INIT_EVERYTHING);
     if (result) {
@@ -75,7 +53,7 @@ int main(int handle, char **params) {
     load_texture_from_file("data/sheet.png", renderer, &texture_sheet);
 
     camera_t camera;
-    camera.transform.world_pos = get_vec2(0, 0);
+    camera.transform.position = get_vec2(0, 0);
     graphics_data.camera = camera;
 
 #define ENTITY_COUNT 2
@@ -87,10 +65,14 @@ int main(int handle, char **params) {
     
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         sprite_renderer_t *tex_renderer = get_sprite_renderer(&graphics_data, &texture);
-        tex_renderer->transform.world_pos = get_vec2(0, 0);
+        tex_renderer->transform.position = get_vec2(0, 0);
         tex_renderer->transform.scale = get_vec2(.5f, .5f);
         tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
-        colliders[i] = get_circle_collider(&physics_data, i, 320);
+        
+        if (i == 0)
+            colliders[i] = get_circle_collider(&physics_data, i, 100);
+        else
+            colliders[i] = get_box_collider(&physics_data, i, tex_renderer->sprite.texture_region.size);
     }
 
     collider_t *first_collider = colliders[0];
@@ -143,10 +125,7 @@ int main(int handle, char **params) {
         start_frame(&time_data);
 
         update_input_data(&input_data);
-        
         update_physics_data(&physics_data);
-        draw_physics_debug(renderer, &physics_data);
-
         update_audio_data(&audio_data, &time_data);
 
         vec2_t to_add = {};
@@ -163,7 +142,7 @@ int main(int handle, char **params) {
         }
 
         source->position = sum_vec2(source->position, to_add);
-        second_renderer->transform.world_pos = sum_vec2(second_renderer->transform.world_pos, to_add);
+        second_renderer->transform.position = sum_vec2(second_renderer->transform.position, to_add);
         
         if (is_key_pressed(&input_data, KEY_p)) {
             first_animation.playing = !first_animation.playing;
@@ -179,9 +158,9 @@ int main(int handle, char **params) {
             reset_animation(&first_animation);
         }
 
-        first_renderer->transform.world_pos = input_data.mouse_pos;
+        first_renderer->transform.position = input_data.mouse_pos;
         audio_data.listener.position = input_data.mouse_pos;
-        message_label.position = second_renderer->transform.world_pos;
+        message_label.position = second_renderer->transform.position;
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -192,22 +171,20 @@ int main(int handle, char **params) {
         set_sprite_on_renderer(first_renderer, &first_animation);
         set_sprite_on_renderer(second_renderer, &second_animation);
 
+        draw_physics_debug(renderer, &physics_data);
+
         for (int i = 0; i < ENTITY_COUNT; ++i) {
             sprite_renderer_t tex_render = graphics_data.renderers[i];
-            rect_t tex_rect = calculate_rect(
-                    tex_render.transform.world_pos,
-                    tex_render.sprite.texture_region.size,
-                    tex_render.transform.scale,
-                    tex_render.normalized_pivot
-            );
-
-            colliders[i]->position = tex_rect.position;
-            //colliders[i]->box_size = tex_rect.size;
-            colliders[i]->circle_radius = tex_rect.size.y;
+            update_collider_pos_based_on_renderer(&tex_render, colliders[i]);
 
             if (colliders[i]->collision_count > 0) {
-                if (!source->playing)
+                message_label.color = COLOR_GREEN;
+                
+                if (!source->playing) {
                     play_audio_source(source);
+                } 
+            } else {
+                message_label.color = COLOR_BLUE;
             }
         }
 
@@ -220,6 +197,8 @@ int main(int handle, char **params) {
         draw_label(renderer, &mouse_pos_label);
         draw_label(renderer, &message_label);
 
+        
+        
         SDL_RenderPresent(renderer);
 
         end_frame(&time_data);

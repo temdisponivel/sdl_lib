@@ -148,10 +148,8 @@ void draw_gui_string_ex(
 
     vec2_t size = get_text_total_size_ex(font, string, scaled_max_size, scale);
 
-    rect_t full_text_rect = get_rect(VEC2_ZERO, size);
-
     vec2_t normalized_pivot = get_normalized_pivot_point(pivot);
-    vec2_t full_text_pivot = denormalize_rect_point(full_text_rect, normalized_pivot);
+    vec2_t full_text_pivot = denormalize_point(size, normalized_pivot);
 
     vec2_t original_draw_pos = sub_vec2(screen_pos, full_text_pivot);
     
@@ -224,7 +222,7 @@ void draw_world_string_ex(
         int size_in_points,
         PIVOT pivot
 ) {
-    vec2_t screen_pos = sub_vec2(world_pos, camera->transform.world_pos);
+    vec2_t screen_pos = sub_vec2(world_pos, camera->transform.position);
     draw_gui_string_ex(renderer, font, screen_pos, max_size, string, color, size_in_points, pivot);
 }
 

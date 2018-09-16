@@ -86,6 +86,8 @@ sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t
 
 void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer);
 
+rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
+
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
 sprite_t create_sprite(texture_t *texture, rect_t region);
@@ -115,5 +117,9 @@ void set_sprite_on_renderer(sprite_renderer_t *renderer, const sprite_animation_
 color_t get_color(byte red, byte green, byte blue, byte alpha);
 
 SDL_Color convert_color(color_t color);
+
+void debug_draw_circle(SDL_Renderer *renderer, vec2_t center, float radius, color_t color);
+
+void debug_draw_rect(SDL_Renderer *renderer, rect_t rect, color_t color);
 
 #endif //SDL_GAME_GRAPHICS_H

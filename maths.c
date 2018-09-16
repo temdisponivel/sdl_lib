@@ -106,29 +106,12 @@ vec2_t normalize_rect_point(rect_t rect, vec2_t point) {
     return normalized;
 }
 
-vec2_t denormalize_rect_point(rect_t rect, vec2_t point) {
+vec2_t denormalize_point(vec2_t region, vec2_t point) {
     vec2_t result;
-    result.x = rect.position.x + (rect.size.x * point.x);
-    result.y = rect.position.y + (rect.size.y * point.y);
+    result.x = (region.width * point.x);
+    result.y = (region.height * point.y);
     return result;
 }
-
-rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normalized_pivot) {
-    vec2_t screen_size = mul_vec2(size, scale);
-
-    vec2_t pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), normalized_pivot);
-    world_pos = sub_vec2(world_pos, pivot);
-
-    rect_t screen_region = get_rect(world_pos, screen_size);
-    return screen_region;
-}
-
-vec2_t get_pivot_point(rect_t rect, PIVOT pivot) {
-    vec2_t normalized = get_normalized_pivot_point(pivot);
-    vec2_t denormalized = denormalize_rect_point(rect, normalized);
-    return denormalized;
-}
-
 
 vec2_t get_normalized_pivot_point(PIVOT pivot) {
     float x = 0;
@@ -167,7 +150,7 @@ SDL_Point convert_vec2(vec2_t vec) {
 
 transform_t get_trans(vec2_t pos, float angle, vec2_t scale) {
     transform_t trans;
-    trans.world_pos = pos;
+    trans.position = pos;
     trans.angle = angle;
     trans.scale = scale;
     return trans;

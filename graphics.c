@@ -64,24 +64,14 @@ void draw_texture_ex(
 
 
 void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const sprite_renderer_t *tex_renderer) {
-    rect_t screen_pos = calculate_rect(
-            tex_renderer->transform.world_pos,
-            tex_renderer->sprite.texture_region.size,
-            tex_renderer->transform.scale,
-            tex_renderer->normalized_pivot
-    );
-
-    screen_pos.position = sub_vec2(screen_pos.position, camera->transform.world_pos);
-    
-    float angle = tex_renderer->transform.angle;
-    angle = angle - camera->transform.angle;
-
     rect_t tex_region = tex_renderer->sprite.texture_region;
-    vec2_t screen_size = mul_vec2(tex_renderer->sprite.texture_region.size, tex_renderer->transform.scale);
-
-    vec2_t pivot = denormalize_rect_point(get_rect(VEC2_ZERO, screen_size), tex_renderer->normalized_pivot);
-
-    draw_texture_ex(renderer, screen_pos, angle, tex_region, pivot, tex_renderer->sprite.texture);
+    vec2_t screen_size = mul_vec2(tex_region.size, tex_renderer->transform.scale);
+    vec2_t pivot = denormalize_point(screen_size, tex_renderer->normalized_pivot);
+    vec2_t world_pos = sub_vec2(tex_renderer->transform.position, pivot);
+    rect_t screen_region = get_rect(world_pos, screen_size);
+    float angle = tex_renderer->transform.angle - camera->transform.angle;
+    
+    draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->sprite.texture);
 }
 
 sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture) {
@@ -97,6 +87,17 @@ sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t
 void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *renderer) {
     SDL_memmove(renderer, &graphics_data->renderers[graphics_data->renderers_count - 1], sizeof(sprite_renderer_t));
     graphics_data->renderers_count--;
+}
+
+rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec2_t scale, vec2_t normalized_pivot) {
+    size = mul_vec2(size, scale);
+    
+    vec2_t pivot = denormalize_point(size, normalized_pivot);
+    vec2_t pos = sub_vec2(position, pivot);
+    
+    rect_t rect = get_rect(pos, size);
+    
+    return rect;
 }
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
@@ -200,4 +201,34 @@ SDL_Color convert_color(color_t color) {
     sdl_color.b = color.blue;
     sdl_color.a = color.alpha;
     return sdl_color;
+}
+
+void debug_draw_circle(SDL_Renderer *renderer, vec2_t center, float radius, color_t color) {
+    
+    SDL_Color sdl_color = convert_color(color);
+    SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
+
+    #define POINTS_COUNT 360
+
+    SDL_Point points[POINTS_COUNT];
+
+    for (int i = 0; i < POINTS_COUNT; ++i) {
+        
+        float rad = RADIANS(i);
+        float x = center.x + (cosf(rad) * radius);
+        float y = center.y + (sinf(rad) * radius);
+        
+        points[i].x = (int) x;
+        points[i].y = (int) y;
+    }
+
+    SDL_RenderDrawPoints(renderer, points, POINTS_COUNT);
+}
+
+void debug_draw_rect(SDL_Renderer *renderer, rect_t rect, color_t color) {
+    SDL_Color sdl_color = convert_color(color);
+    SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
+    
+    SDL_Rect sdl_rect = convert_rect(rect);
+    SDL_RenderDrawRect(renderer, &sdl_rect);
 }

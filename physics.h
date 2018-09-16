@@ -6,6 +6,7 @@
 #define SDL_GAME_PHYSICS_H
 
 #include "maths.h"
+#include "graphics.h"
 
 #define MAX_COLLIDERS 128
 #define MAX_COLLISIONS_PER_COLLIDER 16
@@ -54,6 +55,11 @@ typedef struct physics_data {
 collider_t *get_box_collider(physics_data_t *physics_data, int owner, vec2_t size);
 collider_t *get_circle_collider(physics_data_t *physics_data, int owner, float radius);
 void free_collider(physics_data_t *physics_data, collider_t *collider);
+
+// TODO: This is not the best place for this function because we'll have to include graphics.h
+// which basically couples the physics with the graphic system - an better place would be an file
+// with entity-component-related functions, although I don't think we'll use entity-component here
+void update_collider_pos_based_on_renderer(const sprite_renderer_t *sprite_renderer, collider_t *collider);
 
 bool validate_collision(const collider_t *collider_a, const collider_t *collider_b);
 

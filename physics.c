@@ -40,6 +40,44 @@ void free_collider(physics_data_t *physics_data, collider_t *collider) {
     physics_data->colliders_count--;
 }
 
+void update_collider_pos_based_on_renderer(const sprite_renderer_t *sprite_renderer, collider_t *collider) {
+    transform_t *transform = &sprite_renderer->transform;
+    
+    vec2_t position = transform->position;
+    vec2_t size = sprite_renderer->sprite.texture_region.size;
+    vec2_t scale = transform->scale;
+    vec2_t pivot = sprite_renderer->normalized_pivot;
+    
+    if (collider->shape == BOX) {
+        rect_t sprite_rect = calculate_rect_based_on_pivot_and_scale(
+                position, 
+                size, 
+                scale, 
+                pivot
+        );
+        
+        collider->position = sprite_rect.position;
+        collider->box_size = sprite_rect.size;
+    } else {
+        
+        rect_t sprite_rect = calculate_rect_based_on_pivot_and_scale(
+                position,
+                size,
+                scale,
+                pivot
+        );
+
+        // Circles always use the center pivot
+        vec2_t center_pivot = get_normalized_pivot_point(PIVOT_CENTER);
+        
+        vec2_t center_of_drawing = denormalize_point(sprite_rect.size, center_pivot);
+        center_of_drawing = sum_vec2(center_of_drawing, sprite_rect.position);
+        
+        collider->position = center_of_drawing;
+        collider->circle_radius = sprite_rect.size.x;
+    }
+}
+
 bool validate_collision(const collider_t *collider_a, const collider_t *collider_b) {
     if (collider_a->shape == collider_b->shape) {
         if (collider_a->shape == CIRCLE) {
@@ -94,31 +132,17 @@ void update_physics_data(physics_data_t *physics_data) {
 }
 
 void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider) {
+    color_t color;
     if (collider->collision_count > 0)
-        set_draw_color(renderer, COLOR_BLUE);
+        color = COLOR_BLUE;
     else
-        set_draw_color(renderer, COLOR_RED);
+        color = COLOR_RED;
 
     if (collider->shape == BOX) {
         rect_t rect = get_rect(collider->position, collider->box_size);
-        SDL_Rect sdl_rect = convert_rect(rect);
-        SDL_RenderDrawRect(renderer, &sdl_rect);
+        debug_draw_rect(renderer, rect, color);
     } else {
-        #define POINTS_COUNT 360
-
-        SDL_Point points[POINTS_COUNT];
-
-        for (int i = 0; i < POINTS_COUNT; ++i) {
-            float x = sin(i) * collider->circle_radius;
-            float y = cos(i) * collider->circle_radius;
-            x += collider->position.x;
-            y += collider->position.y;
-
-            points[i].x = x;
-            points[i].y = y;
-        }
-
-        SDL_RenderDrawPoints(renderer, points, POINTS_COUNT);
+        debug_draw_circle(renderer, collider->position, collider->circle_radius, color);
     }
 }
 
