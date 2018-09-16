@@ -130,7 +130,7 @@ void draw_gui_string(
         const char *string,
         color_t color
 ) {
-    draw_gui_string_ex(renderer, font, screen_pos, RESIZE_TO_FIT, string, color, DEFAULT_FONT_SIZE, DEFAULT_PIVOT);
+    draw_gui_string_ex(renderer, font, screen_pos, RESIZE_TO_FIT, string, color, font->size_in_points, DEFAULT_PIVOT);
 }
 
 void draw_gui_string_ex(
@@ -210,7 +210,7 @@ void draw_world_string(
         const char *string,
         color_t color
 ) {
-    draw_world_string_ex(renderer, font, camera, world_pos, RESIZE_TO_FIT, string, color, DEFAULT_FONT_SIZE, DEFAULT_PIVOT);
+    draw_world_string_ex(renderer, font, camera, world_pos, RESIZE_TO_FIT, string, color, font->size_in_points, DEFAULT_PIVOT);
 }
 
 void draw_world_string_ex(
@@ -226,4 +226,41 @@ void draw_world_string_ex(
 ) {
     vec2_t screen_pos = sub_vec2(world_pos, camera->transform.world_pos);
     draw_gui_string_ex(renderer, font, screen_pos, max_size, string, color, size_in_points, pivot);
+}
+
+void setup_label(label_t *label, font_t *font, const char *text, color_t color) {
+    setup_label_ex(label, VEC2_ZERO, font, text, color, DEFAULT_PIVOT, font->size_in_points, LABEL_RESIZE_TO_FIT);
+}
+
+void setup_label_ex(label_t *label, vec2_t position, font_t *font, const char *text, color_t color, PIVOT pivot, int text_size_in_points, LABEL_RESIZE_MODE resize_mode) {
+    label->position = position;
+    label->font = font;
+    set_label_text(label, text);
+    label->color = color;
+    label->pivot = pivot;
+    label->text_size_in_points = text_size_in_points;
+    label->resize_mode = resize_mode;
+}
+
+void set_label_text(label_t *label, const char *text) {
+    size_t len = strlen(text);
+    SDL_assert(len < MAX_LABEL_STRING_LEN);
+    strcpy(label->text, text);
+}
+
+void draw_label(SDL_Renderer *renderer, const label_t *label) {
+    vec2_t max_size;
+    switch (label->resize_mode) {
+        case LABEL_RESIZE_TO_FIT:
+            max_size = RESIZE_TO_FIT;
+            break;
+        case LABEL_RESIZE_HEIGHT:
+            max_size = RESIZE_HEIGHT(label->max_width);
+            break;
+        case LABEL_FIXED_SIZE:
+            max_size = label->max_size;
+            break;
+    }
+    
+    draw_gui_string_ex(renderer, label->font, label->position, max_size, label->text, label->color, label->text_size_in_points, label->pivot);
 }

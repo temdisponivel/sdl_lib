@@ -18,8 +18,8 @@
 
 #define RESIZE_TO_FIT get_vec2(0xFFFFFF, 0xFFFFFF)
 #define RESIZE_HEIGHT(max_width) get_vec2((max_width), 0xFFFFFF)
-#define GET_HEIGHT_FOR_LINES(gui_data, max_lines) ((gui_data).line_spacing * (max_lines))
-#define RESIZE_HEIGHT_MAX_LINES(gui_data, max_width, max_lines) get_vec2((max_width), GET_HEIGHT_FOR_LINES((gui_data), (max_lines)))
+
+#define MAX_LABEL_STRING_LEN 256
 
 typedef enum font_style {
     NORMAL = TTF_STYLE_NORMAL,
@@ -29,12 +29,34 @@ typedef enum font_style {
     UNDERLINE = TTF_STYLE_UNDERLINE,    
 } FONT_STYLE;
 
+typedef enum {
+    LABEL_RESIZE_TO_FIT,
+    LABEL_RESIZE_HEIGHT,
+    LABEL_FIXED_SIZE
+} LABEL_RESIZE_MODE;
+
 typedef struct font {
     TTF_Font *font;
     texture_t characters[DEFAULT_CHARACTER_SET_SIZE];
     int line_spacing;
     int size_in_points;
 } font_t;
+
+typedef struct label {
+    vec2_t position;
+    font_t *font;
+    char text[MAX_LABEL_STRING_LEN];
+    color_t color;
+    PIVOT pivot;
+    int text_size_in_points;
+
+    LABEL_RESIZE_MODE resize_mode;
+    
+    union {
+        float max_width;
+        vec2_t max_size;
+    };
+} label_t;
 
 void init_font_from_file(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style);
 
@@ -84,5 +106,22 @@ void draw_world_string_ex(
         int size_in_points,
         PIVOT pivot
 );
+
+void setup_label(label_t *label, font_t *font, const char *text, color_t color);
+
+void setup_label_ex(
+        label_t *label, 
+        vec2_t position, 
+        font_t *font, 
+        const char *text, 
+        color_t color, 
+        PIVOT pivot, 
+        int text_size_in_points,
+        LABEL_RESIZE_MODE resize_mode
+);
+
+void set_label_text(label_t *label, const char *text);
+
+void draw_label(SDL_Renderer *renderer, const label_t *label);
 
 #endif //SDL_GAME_TEXT_H
