@@ -8,8 +8,8 @@
 #include "maths.h"
 #include "graphics.h"
 
-#define MAX_COLLIDERS 128
-#define MAX_COLLISIONS_PER_COLLIDER 16
+#define MAX_COLLIDERS 256
+#define MAX_COLLISIONS_PER_COLLIDER 256
 
 typedef enum {
     TOP_LEFT_AREA = 1 << 0,

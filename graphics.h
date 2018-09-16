@@ -8,8 +8,14 @@
 #include "maths.h"
 #include "time.h"
 
-#define MAX_RENDERERS 64
+#define MAX_RENDERERS 1024
 #define MAX_SPRITES_ON_ANIMATOR 32
+#define MAX_LAYERS 16
+
+#define FIRST_LAYER 0;
+#define LAST_LAYER MAX_LAYERS - 1
+
+typedef ubyte layer_index_t;
 
 typedef struct texture {
     SDL_Texture *handle;
@@ -37,6 +43,10 @@ typedef struct sprite_renderer {
     
     transform_t transform;
     vec2_t normalized_pivot;
+    
+    int depth_inside_layer;
+
+    layer_index_t layer;
 
 } sprite_renderer_t;
 
@@ -45,11 +55,26 @@ typedef struct camera {
 } camera_t;
 
 typedef struct color {
-    byte red;
-    byte green;
-    byte blue;
-    byte alpha;
+    ubyte red;
+    ubyte green;
+    ubyte blue;
+    ubyte alpha;
 } color_t;
+
+typedef struct drawing_layer {
+    sprite_renderer_t *renderers[MAX_RENDERERS];
+    int renderer_count;
+} drawing_layer_t;
+
+// TODO: Add an texture array that will hold all loaded textures
+// create a function to get texture by name and return from the array or load if necessary
+typedef struct graphics_data {    
+    camera_t camera;
+    sprite_renderer_t renderers[MAX_RENDERERS];
+    uint renderers_count;
+    
+    drawing_layer_t layers[MAX_LAYERS];
+} graphics_data_t;
 
 #define COLOR_CHANNEL_FULL 255
 #define COLOR_RED get_color(COLOR_CHANNEL_FULL, 0, 0, COLOR_CHANNEL_FULL)
@@ -58,14 +83,7 @@ typedef struct color {
 #define COLOR_BLACK get_color(0, 0, 0, COLOR_CHANNEL_FULL)
 #define COLOR_WHITE get_color(COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL)
 #define COLOR_TRANSPARENT get_color(0, 0, 0, 0)
-
-// TODO: Add an texture array that will hold all loaded textures
-// create a function to get texture by name and return from the array or load if necessary
-typedef struct graphics_data {    
-    camera_t camera;
-    sprite_renderer_t renderers[MAX_RENDERERS];
-    uint renderers_count;
-} graphics_data_t;
+#define COLOR_TO_PARAMETERS(color) (color).red, (color).green, (color).blue, (color).alpha
 
 void load_texture_from_file(const char *file_name, SDL_Renderer *renderer, texture_t *texture);
 
@@ -88,6 +106,7 @@ void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *ren
 
 rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
 
+void update_graphics_data(graphics_data_t *graphics_data);
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
 sprite_t create_sprite(texture_t *texture);

@@ -240,6 +240,12 @@ void setup_label_ex(label_t *label, font_t *font, const char *text, color_t colo
     label->resize_mode = resize_mode;
 }
 
+vec2_t get_label_drawing_size(const label_t *label) {
+    vec2_t max_size = get_label_max_size(label);
+    vec2_t size = get_text_total_size(label->font, label->text, max_size, label->text_size_in_points);
+    return size;
+}
+
 vec2_t get_label_pos_inside_rect(rect_t rect, PIVOT label_pivot) {
     vec2_t pivot = get_normalized_pivot_point(label_pivot);
     vec2_t pos = denormalize_point_inside_rect(rect, pivot);
@@ -252,7 +258,7 @@ void set_label_text(label_t *label, const char *text) {
     strcpy(label->text, text);
 }
 
-void draw_label(SDL_Renderer *renderer, vec2_t position, const label_t *label) {
+vec2_t get_label_max_size(const label_t *label) {
     vec2_t max_size;
     switch (label->resize_mode) {
         case LABEL_RESIZE_TO_FIT:
@@ -265,7 +271,11 @@ void draw_label(SDL_Renderer *renderer, vec2_t position, const label_t *label) {
             max_size = label->max_size;
             break;
     }
-    
+    return max_size;
+}
+
+void draw_label(SDL_Renderer *renderer, vec2_t position, const label_t *label) {
+    vec2_t max_size = get_label_max_size(label);    
     draw_gui_string_ex(renderer, label->font, position, max_size, label->text, label->color, label->text_size_in_points, label->pivot);
 }
 
@@ -462,13 +472,13 @@ void setup_button(button_t *button, label_t label, vec2_t size, sprite_t sprite,
     button->pivot = pivot;
 }
 
-void draw_button(
+bool draw_button(
         SDL_Renderer *renderer,
         input_data_t *input_data,
         vec2_t position,
         const button_t *button
 ) {
-    draw_click_area_colored_sprites_ex(
+    return draw_click_area_colored_sprites_ex(
             renderer,
             input_data,
             position,

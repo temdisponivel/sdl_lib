@@ -25,16 +25,11 @@ int main(int handle, char **params) {
         return -2;
     }
 
-    SDL_Window *window = SDL_CreateWindow("Test SDL!", 100, 100, 800, 600,
-                                          SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
-
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
+    video_data_t video_data = {};
     graphics_data_t graphics_data = {};
     input_data_t input_data = {};
     time_data_t time_data = {};
-    physics_data_t physics_data = {};
+    physics_data_t *physics_data = calloc(1, sizeof(physics_data_t));
     audio_data_t audio_data = {};
     font_t font = {};
 
@@ -42,7 +37,18 @@ int main(int handle, char **params) {
     SDL_assert(inited);
 
     time_data.time_scale = 1;
-    time_data.target_frame_rate = 60;
+    //time_data.target_frame_rate = 60;
+    
+    window_parameters_t win_params;
+    win_params.resolution = get_vec2(800, 600);
+    win_params.full_screen = false;
+    win_params.resizable = false;
+    win_params.clear_color = COLOR_RED;
+    win_params.v_sync_on = false;
+    win_params.title = "SDL!";
+    init_video(&video_data, &win_params);
+    
+    SDL_Renderer *renderer = video_data.sdl_renderer;
 
     init_font_from_file(renderer, &font, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, ITALIC);
 
@@ -67,7 +73,7 @@ int main(int handle, char **params) {
     camera.transform.position = get_vec2(0, 0);
     graphics_data.camera = camera;
 
-#define ENTITY_COUNT 2
+#define ENTITY_COUNT 256
 
     collider_t *colliders[ENTITY_COUNT];
     
@@ -81,9 +87,9 @@ int main(int handle, char **params) {
         tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
         
         if (i == 0)
-            colliders[i] = get_circle_collider(&physics_data, i, 100);
+            colliders[i] = get_circle_collider(physics_data, i, 100);
         else
-            colliders[i] = get_box_collider(&physics_data, i, tex_renderer->sprite.texture_region.size);
+            colliders[i] = get_box_collider(physics_data, i, tex_renderer->sprite.texture_region.size);
     }
 
     collider_t *first_collider = colliders[0];
@@ -91,6 +97,8 @@ int main(int handle, char **params) {
     
     sprite_renderer_t *first_renderer = &graphics_data.renderers[0];
     sprite_renderer_t *second_renderer = &graphics_data.renderers[1];
+    
+    first_renderer->depth_inside_layer = 10;
 
     sound_t effect = load_sound_from_file("data/effect.wav", EFFECT);
     sound_t music = load_sound_from_file("data/music.mp3", MUSIC);
@@ -100,6 +108,8 @@ int main(int handle, char **params) {
 
     music_source->volume = 0;
     fade_in_audio_source(music_source, 20);
+    
+    audio_data.listener.volume = .01f;
 
     play_audio_source(music_source);
 
@@ -130,13 +140,19 @@ int main(int handle, char **params) {
     label_t message_label;
     setup_label(&message_label, &font, "Hello, is anybody there?", COLOR_RED);
     
+    button_t button;
+    vec2_t button_size = get_label_drawing_size(&mouse_pos_label);
+    setup_button(&button, mouse_pos_label, button_size, button_normal_sprite, COLOR_TRANSPARENT, COLOR_BLUE, COLOR_RED, PIVOT_BOTTOM_RIGHT);
+    
     while (!input_data.quit_event_called) {
 
         start_frame(&time_data);
 
         update_input_data(&input_data);
-        update_physics_data(&physics_data);
+        update_physics_data(physics_data);
         update_audio_data(&audio_data, &time_data);
+        update_graphics_data(&graphics_data);
+        update_video_data(&video_data);
 
         vec2_t to_add = {};
         int speed = 100;
@@ -171,8 +187,9 @@ int main(int handle, char **params) {
         first_renderer->transform.position = input_data.mouse_pos;
         audio_data.listener.position = input_data.mouse_pos;
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        clear_window(&video_data);
+        //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        //SDL_RenderClear(renderer);
 
         update_sprite_animation(&time_data, &first_animation);
         update_sprite_animation(&time_data, &second_animation);
@@ -180,7 +197,7 @@ int main(int handle, char **params) {
         set_sprite_on_renderer(first_renderer, &first_animation);
         set_sprite_on_renderer(second_renderer, &second_animation);
 
-        draw_physics_debug(renderer, &physics_data);
+        draw_physics_debug(renderer, physics_data);
 
         for (int i = 0; i < ENTITY_COUNT; ++i) {
             sprite_renderer_t tex_render = graphics_data.renderers[i];
@@ -200,10 +217,12 @@ int main(int handle, char **params) {
         draw(renderer, &graphics_data);
         
         char mouse_pos_text[128];
-        sprintf(mouse_pos_text, "x: %f - y: %f", input_data.mouse_pos.x, input_data.mouse_pos.y);
-        set_label_text(&mouse_pos_label, mouse_pos_text);
+        sprintf(mouse_pos_text, "fps: %f | width: %i - height: %i | x: %f - y: %f", 1 / time_data.dt, (int) video_data.resolution.width, (int) video_data.resolution.height, input_data.mouse_pos.x, input_data.mouse_pos.y);
+        set_label_text(&button.label, mouse_pos_text);
+
+        button.size = get_label_drawing_size(&button.label);
         
-        draw_label(renderer, get_vec2(800, 600), &mouse_pos_label);
+        //draw_label(renderers, get_vec2(800, 600), &mouse_pos_label);
         draw_label(renderer, second_renderer->transform.position, &message_label);
         
         bool clicked = draw_click_area_sprites_ex(
@@ -226,6 +245,7 @@ int main(int handle, char **params) {
         if (clicked) {
             SDL_Log("Sprite!!");
             play_audio_source(source);
+            set_video_full_screen(&video_data, !video_data.full_screen_on);
         }
 
         clicked = draw_click_area_color_ex(
@@ -247,6 +267,11 @@ int main(int handle, char **params) {
 
         if (clicked) {
             SDL_Log("Color!!");
+            if (video_data.full_screen_on) {
+                set_video_resolution(&video_data, get_vec2(1920, 1080));
+            } else {
+                set_video_resolution(&video_data, get_vec2(800, 600));
+            }
         }
         
         clicked = draw_click_area_colored_sprites_ex(
@@ -269,9 +294,17 @@ int main(int handle, char **params) {
 
         if (clicked) {
             SDL_Log("Sprite Color!!");
+            set_video_clear_color(&video_data, COLOR_BLACK);
+        }
+        
+        clicked = draw_button(renderer, &input_data, get_vec2(800, 600), &button);
+        if (clicked) {
+            SDL_Log("Mouse pos clicked!!!");
         }
                         
-        SDL_RenderPresent(renderer);
+        
+        //SDL_RenderPresent(renderer);
+        flip_video(&video_data);
 
         end_frame(&time_data);
     }

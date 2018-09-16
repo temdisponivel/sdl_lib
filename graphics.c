@@ -81,6 +81,8 @@ sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t
     renderer->sprite = create_sprite_ex(texture, get_rect(VEC2_ZERO, texture->size));
     renderer->transform = IDENTITY_TRANS;
     renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
+    renderer->depth_inside_layer = 0;
+    renderer->layer = FIRST_LAYER;
     return renderer;
 }
 
@@ -100,10 +102,45 @@ rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec
     return rect;
 }
 
-void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
+int compare_depth_func(const void *first, const void *second) {
+    sprite_renderer_t *first_renderer =  *((sprite_renderer_t **) first); 
+    sprite_renderer_t *second_renderer = *((sprite_renderer_t **) second);
+    
+    int result;    
+    if (first_renderer->depth_inside_layer > second_renderer->depth_inside_layer) {
+        result = 1;        
+    } else {
+        result = -1;
+    }
+    
+    return result;
+}
+
+void update_graphics_data(graphics_data_t *graphics_data) {
+    for (int i = 0; i < MAX_LAYERS; ++i) {
+        graphics_data->layers[i].renderer_count = 0;
+    }
+    
     for (int i = 0; i < graphics_data->renderers_count; ++i) {
-        sprite_renderer_t *tex_renderer = &graphics_data->renderers[i];
-        draw_sprite_renderer(renderer, &graphics_data->camera, tex_renderer);
+        sprite_renderer_t *renderer = &graphics_data->renderers[i];
+        SDL_assert(renderer->layer >= 0 && renderer->layer < MAX_LAYERS);
+        drawing_layer_t *layer = &graphics_data->layers[renderer->layer];
+        layer->renderers[layer->renderer_count++] = renderer;
+    }
+    
+    for (int i = 0; i < MAX_LAYERS; ++i) {
+        drawing_layer_t *layer = &graphics_data->layers[i];
+        qsort(layer->renderers, (size_t) layer->renderer_count, sizeof(sprite_renderer_t *), compare_depth_func);
+    }
+}
+
+void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
+    for (int i = 0; i < MAX_LAYERS; ++i) {
+        drawing_layer_t *layer = &graphics_data->layers[i];
+        for (int j = 0; j < layer->renderer_count; ++j) {
+            sprite_renderer_t *tex_renderer = layer->renderers[j];
+            draw_sprite_renderer(renderer, &graphics_data->camera, tex_renderer);
+        }
     }
 }
 

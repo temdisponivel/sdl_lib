@@ -3,5 +3,7 @@
 create a resource system to handle texture, sounds, etc
     handle creation destruction of resources
     
+fix collision audio not respecting the listener volume
+    
 add resolution-independent gui code
 add clamp options (elipse, clamp, break_line) to text drawing

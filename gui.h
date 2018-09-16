@@ -132,7 +132,11 @@ void setup_label_ex(
         LABEL_RESIZE_MODE resize_mode
 );
 
+vec2_t get_label_drawing_size(const label_t *label);
+
 vec2_t get_label_pos_inside_rect(rect_t rect, PIVOT label_pivot);
+
+vec2_t get_label_max_size(const label_t *label);
 
 void set_label_text(label_t *label, const char *text);
 
@@ -213,35 +217,11 @@ void setup_button(
         PIVOT pivot
 );
 
-void draw_button(
+bool draw_button(
         SDL_Renderer *renderer,
         input_data_t *input_data,
         vec2_t position,
         const button_t *button
-);
-
-
-bool draw_click_area_colored_sprites_ex_test(
-        SDL_Renderer *renderer,
-        input_data_t *input_data,
-
-        vec2_t position,
-        vec2_t size,
-        PIVOT pivot,
-
-        sprite_t *sprite,
-
-        color_t normal_color,
-        color_t hover_color,
-        color_t click_color,
-
-        font_t *font,
-        const char *text,
-        int text_size_in_points,
-        color_t normal_text_color,
-        color_t clicked_text_color,
-        PIVOT text_pivot,
-        vec2_t normalized_text_position
 );
 
 #endif //SDL_GAME_TEXT_H
