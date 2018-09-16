@@ -114,4 +114,6 @@ void set_sprite_on_renderer(sprite_renderer_t *renderer, const sprite_animation_
 
 color_t get_color(byte red, byte green, byte blue, byte alpha);
 
+SDL_Color convert_color(color_t color);
+
 #endif //SDL_GAME_GRAPHICS_H

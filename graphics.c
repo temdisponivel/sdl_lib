@@ -192,3 +192,12 @@ color_t get_color(byte red, byte green, byte blue, byte alpha) {
     color.alpha = alpha;
     return color;
 }
+
+SDL_Color convert_color(color_t color) {
+    SDL_Color sdl_color;
+    sdl_color.r = color.red;
+    sdl_color.g = color.green;
+    sdl_color.b = color.blue;
+    sdl_color.a = color.alpha;
+    return sdl_color;
+}

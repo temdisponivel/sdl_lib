@@ -8,7 +8,7 @@
 #define INDEX_TO_CHAR(index) ((ushort) ((index) + 32))
 #define CHAR_TO_INDEX(ch) ((int) ((ch) - 32))
 
-void init_font(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style) {
+void init_font_from_file(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style) {
     
     font->font = load_font_from_file(font_path, font_size_in_points, font_style);
     font->line_spacing = TTF_FontLineSkip(font->font);
@@ -16,14 +16,13 @@ void init_font(SDL_Renderer *renderer, font_t *font, const char *font_path, int 
     
     for (int i = 0; i < DEFAULT_CHARACTER_SET_SIZE; ++i) {
 
-        SDL_Color color = {};
-        color.r = 255;
-        color.a = 255;
+        SDL_Color color = convert_color(COLOR_WHITE);
         SDL_Surface *surface = TTF_RenderGlyph_Solid(font->font, INDEX_TO_CHAR(i), color);
+        
         if (surface == null) {
-            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't get surface for character '%i'. Error msg: %s",
-                         INDEX_TO_CHAR(i), TTF_GetError());
+            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't get surface for character '%i'. Error msg: %s", INDEX_TO_CHAR(i), TTF_GetError());
         }
+        
         texture_t texture;
         texture.size = get_vec2(surface->w, surface->h);
         texture.handle = SDL_CreateTextureFromSurface(renderer, surface);;
@@ -37,8 +36,7 @@ TTF_Font *load_font_from_file(const char *font_path, int size_in_points, FONT_ST
     TTF_SetFontHinting(font, font_style);
 
     if (font == null) {
-        SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load font at path: '%s'. Make sure the font exists!",
-                     font_path);
+        SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load font at path: '%s'. Make sure the font exists!", font_path);
     }
 
     return font;
@@ -125,6 +123,16 @@ void get_string_draw_actions(
     }
 }
 
+void draw_gui_string(
+        SDL_Renderer *renderer,
+        const font_t *font,
+        vec2_t screen_pos,
+        const char *string,
+        color_t color
+) {
+    draw_gui_string_ex(renderer, font, screen_pos, RESIZE_TO_FIT, string, color, DEFAULT_FONT_SIZE, DEFAULT_PIVOT);
+}
+
 void draw_gui_string_ex(
         SDL_Renderer *renderer,
         const font_t *font,
@@ -186,6 +194,7 @@ void draw_gui_string_ex(
         rect_t full_texture_rect = get_rect(VEC2_ZERO, scaled_tex_size);
         rect_t screen_rect = get_rect(draw_pos, scaled_tex_size);
 
+        SDL_SetTextureColorMod(texture.handle, color.red, color.green, color.blue);
         draw_texture_ex(renderer, screen_rect, 0, full_texture_rect, VEC2_ZERO, &texture);
 
         current_text_size.width += screen_rect.size.width;
@@ -194,6 +203,17 @@ void draw_gui_string_ex(
 }
 
 void draw_world_string(
+        SDL_Renderer *renderer,
+        const font_t *font,
+        const camera_t *camera,
+        vec2_t world_pos,
+        const char *string,
+        color_t color
+) {
+    draw_world_string_ex(renderer, font, camera, world_pos, RESIZE_TO_FIT, string, color, DEFAULT_FONT_SIZE, DEFAULT_PIVOT);
+}
+
+void draw_world_string_ex(
         SDL_Renderer *renderer,
         const font_t *font,
         const camera_t *camera,

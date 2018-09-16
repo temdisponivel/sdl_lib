@@ -7,4 +7,5 @@ create a resource system to handle texture, sounds, etc
     handle creation destruction of resources
     
 add resolution-independent gui code
+implement the color on the draw_string apis
 add clamp options (elipse, clamp, break_line) to text drawing

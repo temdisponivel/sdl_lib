@@ -76,7 +76,7 @@ int main(int handle, char **params) {
     SDL_Renderer *renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-    init_font(renderer, &gui_data, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, ITALIC);
+    init_font_from_file(renderer, &gui_data, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, ITALIC);
 
     texture_t texture;
     load_texture_from_file("data/image.png", renderer, &texture);
@@ -245,30 +245,12 @@ int main(int handle, char **params) {
         draw_physics_debug(renderer, &physics_data);
         update_audio_data(&audio_data, &time_data);
 
-        draw_world_string(renderer, &gui_data, &graphics_data.camera, graphics_data.renderers[1].transform.world_pos, RESIZE_HEIGHT(100), "Hello, my friend! This is a very long text! 45454554", COLOR_RED, 54, PIVOT_CENTER);
+        draw_world_string(renderer, &gui_data, &graphics_data.camera, graphics_data.renderers[1].transform.world_pos, "Hello, my friend! This is a very long text! 45454554", COLOR_RED);
 
-        
         char mouse_pos_text[128];
         sprintf(mouse_pos_text, "x: %f - y: %f", input_data.mouse_pos.x, input_data.mouse_pos.y);
-        draw_gui_string_ex(renderer, &gui_data, get_vec2(800, 600), RESIZE_TO_FIT, mouse_pos_text, COLOR_RED, DEFAULT_FONT_SIZE, PIVOT_BOTTOM_RIGHT);
-/*
-        SDL_Color color;
-        color.r = 255;
-        color.g = 0;
-        color.b = 0;
-        color.a = 255;
-        SDL_Surface *text_surface = TTF_RenderText_Solid(font, "Hello, my friend!", color);
-        SDL_Log("format: %i", text_surface->format->format);
-        SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+        draw_gui_string_ex(renderer, &gui_data, get_vec2(800, 600), RESIZE_TO_FIT, mouse_pos_text, COLOR_BLUE, DEFAULT_FONT_SIZE, PIVOT_BOTTOM_RIGHT);
 
-        rect_t text_rect = get_rect(get_vec2(100, 100), get_vec2(text_surface->w, text_surface->h));
-        SDL_Rect sdl_text_rect = convert_rect(text_rect);
-        SDL_RenderCopy(renderer, text_texture, null, &sdl_text_rect);
-
-        SDL_FreeSurface(text_surface);
-        SDL_DestroyTexture(text_texture);
-*/
-        
         SDL_RenderPresent(renderer);
 
         end_frame(&time_data);
