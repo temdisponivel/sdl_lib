@@ -123,8 +123,7 @@ void draw_world_string_ex(
 void setup_label(label_t *label, font_t *font, const char *text, color_t color);
 
 void setup_label_ex(
-        label_t *label, 
-        vec2_t position, 
+        label_t *label,
         font_t *font, 
         const char *text, 
         color_t color, 
@@ -144,18 +143,17 @@ bool draw_click_area_sprites_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT pivot,
 
         sprite_t *normal_sprite,
         sprite_t *hover_sprite,
         sprite_t *clicked_sprite,
 
         font_t *font,
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-
-        const char *text,
-
-        int text_size_in_points,
         PIVOT text_pivot
 );
 
@@ -166,6 +164,7 @@ bool draw_click_area_colored_sprites_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT pivot,
 
         sprite_t *sprite,
 
@@ -174,15 +173,11 @@ bool draw_click_area_colored_sprites_ex(
         color_t click_color,
 
         font_t *font,
-        
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-        
-        const char *text,
-        
-        int text_size_in_points,
-
-        PIVOT pivot
+        PIVOT text_pivot
 );
         
 bool draw_click_area_color_ex(
@@ -191,21 +186,36 @@ bool draw_click_area_color_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT button_pivot,
 
         color_t normal_color,
         color_t hover_color,
         color_t click_color,
 
         font_t *font,
-
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-        
-        const char *text,
+        PIVOT text_pivot
+);
 
-        int text_size_in_points,
-
+void setup_button(
+        button_t *button,
+        label_t label, 
+        vec2_t size,
+        sprite_t sprite, 
+        color_t normal_color, 
+        color_t hover_color, 
+        color_t click_color,
         PIVOT pivot
+);
+
+void draw_button(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+        vec2_t position,
+        const button_t *button
 );
 
 #endif //SDL_GAME_TEXT_H

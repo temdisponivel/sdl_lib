@@ -205,25 +205,27 @@ int main(int handle, char **params) {
         
         draw_label(renderer, get_vec2(800, 600), &mouse_pos_label);
         draw_label(renderer, second_renderer->transform.position, &message_label);
-
+        
         bool clicked = draw_click_area_sprites_ex(
                 renderer,
                 &input_data,
                 get_vec2(400, 300),
                 get_vec2(200, 100),
+                PIVOT_CENTER,
                 &button_normal_sprite,
                 &button_clicked_sprite,
                 &button_clicked_sprite,
                 &font,
-                COLOR_GREEN,
-                COLOR_BLACK,
                 "Click me!",
                 24,
-                PIVOT_CENTER
+                COLOR_GREEN,
+                COLOR_BLACK,
+                PIVOT_TOP
         );
 
         if (clicked) {
             SDL_Log("Sprite!!");
+            play_audio_source(source);
         }
 
         clicked = draw_click_area_color_ex(
@@ -231,15 +233,16 @@ int main(int handle, char **params) {
                 &input_data,
                 get_vec2(400, 400),
                 get_vec2(200, 100),
+                PIVOT_CENTER,
                 COLOR_RED,
                 COLOR_BLUE,
                 COLOR_GREEN,
                 &font,
-                COLOR_WHITE,
-                COLOR_BLACK,
                 "Click me!",
                 24,
-                PIVOT_CENTER
+                COLOR_WHITE,
+                COLOR_BLACK,
+                PIVOT_LEFT
         );
 
         if (clicked) {
@@ -251,16 +254,17 @@ int main(int handle, char **params) {
                 &input_data,
                 get_vec2(400, 500),
                 get_vec2(200, 100),
+                PIVOT_CENTER,
                 &button_normal2_sprite,
                 COLOR_RED,
                 COLOR_BLUE,
                 COLOR_GREEN,
                 &font,
-                COLOR_WHITE,
-                COLOR_BLACK,
                 "Click me!",
                 24,
-                PIVOT_CENTER
+                COLOR_WHITE,
+                COLOR_BLACK,
+                PIVOT_RIGHT
         );
 
         if (clicked) {

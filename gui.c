@@ -159,7 +159,7 @@ void draw_gui_string_ex(
 
     int line_skip_height = (int) (font->line_spacing * scale.y);
     current_text_size.height = line_skip_height;
-
+    
     size_t len = strlen(string);
     for (int i = 0; i < len; ++i) {
         char ch = string[i];
@@ -228,10 +228,10 @@ void draw_world_string_ex(
 }
 
 void setup_label(label_t *label, font_t *font, const char *text, color_t color) {
-    setup_label_ex(label, VEC2_ZERO, font, text, color, DEFAULT_PIVOT, font->size_in_points, LABEL_RESIZE_TO_FIT);
+    setup_label_ex(label, font, text, color, DEFAULT_PIVOT, font->size_in_points, LABEL_RESIZE_TO_FIT);
 }
 
-void setup_label_ex(label_t *label, vec2_t position, font_t *font, const char *text, color_t color, PIVOT pivot, int text_size_in_points, LABEL_RESIZE_MODE resize_mode) {
+void setup_label_ex(label_t *label, font_t *font, const char *text, color_t color, PIVOT pivot, int text_size_in_points, LABEL_RESIZE_MODE resize_mode) {
     label->font = font;
     set_label_text(label, text);
     label->color = color;
@@ -295,19 +295,18 @@ bool draw_click_area_sprites_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT pivot,
 
         sprite_t *normal_sprite,
         sprite_t *hover_sprite,
         sprite_t *clicked_sprite,
 
         font_t *font,
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-
-        const char *text,
-
-        int text_size_in_points,
-        PIVOT pivot
+        PIVOT text_pivot
 ) {
     vec2_t original_pos = position;
     
@@ -332,7 +331,12 @@ bool draw_click_area_sprites_ex(
     }
     
     draw_texture_ex(renderer, button_rect, 0, sprite->texture_region, VEC2_ZERO, sprite->texture);
-    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+
+    label_t label;
+    setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
+    label.max_size = size;
+        
+    draw_label(renderer, original_pos, &label);
     
     return released;
 }
@@ -343,6 +347,7 @@ bool draw_click_area_colored_sprites_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT pivot,
 
         sprite_t *sprite,
 
@@ -351,15 +356,11 @@ bool draw_click_area_colored_sprites_ex(
         color_t click_color,
 
         font_t *font,
-
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-        
-        const char *text,
-
-        int text_size_in_points,
-
-        PIVOT pivot
+        PIVOT text_pivot
 ) {
     vec2_t original_pos = position;
 
@@ -386,7 +387,12 @@ bool draw_click_area_colored_sprites_ex(
     SDL_SetTextureColorMod(sprite->texture->handle, sprite_color.red, sprite_color.green, sprite_color.blue);
 
     draw_texture_ex(renderer, button_rect, 0, sprite->texture_region, VEC2_ZERO, sprite->texture);
-    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+
+    label_t label;
+    setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
+    label.max_size = size;
+    
+    draw_label(renderer, original_pos, &label);
 
     return released;
 }
@@ -397,21 +403,18 @@ bool draw_click_area_color_ex(
 
         vec2_t position,
         vec2_t size,
+        PIVOT pivot,
 
         color_t normal_color,
         color_t hover_color,
         color_t click_color,
 
         font_t *font,
-
+        const char *text,
+        int text_size_in_points,
         color_t normal_text_color,
         color_t clicked_text_color,
-        
-        const char *text,
-
-        int text_size_in_points,
-
-        PIVOT pivot
+        PIVOT text_pivot
 ) {
     vec2_t original_pos = position;
 
@@ -436,7 +439,47 @@ bool draw_click_area_color_ex(
     }
 
     debug_draw_fill_rect(renderer, button_rect, rect_color);
-    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+
+    label_t label;
+    setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
+    label.max_size = size;
+
+    draw_label(renderer, original_pos, &label);
 
     return released;
+}
+
+void setup_button(button_t *button, label_t label, vec2_t size, sprite_t sprite, color_t normal_color, color_t hover_color, color_t click_color, PIVOT pivot) {
+    button->label = label;
+    button->size = size;
+    button->sprite = sprite;
+    button->normal_color = normal_color;
+    button->hover_color = hover_color;
+    button->clicked_color = click_color;
+    button->pivot = pivot;
+}
+
+void draw_button(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+        vec2_t position,
+        const button_t *button
+) {
+    draw_click_area_colored_sprites_ex(
+            renderer,
+            input_data,
+            position,
+            button->size,
+            button->pivot,
+            &button->sprite,
+            button->normal_color,
+            button->hover_color,
+            button->clicked_color,
+            button->label.font,
+            button->label.text,
+            button->label.text_size_in_points,
+            button->label.color,
+            button->label.color,
+            button->label.pivot
+    );
 }
