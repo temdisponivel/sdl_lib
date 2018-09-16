@@ -34,6 +34,10 @@ bool init_audio(audio_data_t *audio_data) {
     return result;
 }
 
+bool free_audio() {
+    Mix_Quit();
+}
+
 audio_source_t *get_base_audio_source(audio_data_t *audio_data) {
     SDL_assert(audio_data->audio_source_count < MAX_AUDIO_SOURCES);
 

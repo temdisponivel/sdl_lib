@@ -38,6 +38,8 @@ typedef struct video_data {
 } video_data_t;
 
 bool init_video(video_data_t *video_data, const window_parameters_t *parameters);
+void free_video();
+
 void update_video_data(video_data_t *video_data);
 void clear_window(video_data_t *video_data);
 void flip_video(video_data_t *video_data);

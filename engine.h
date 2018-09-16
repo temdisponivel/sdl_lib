@@ -11,6 +11,7 @@
 #include "physics.h"
 #include "audio.h"
 #include "video.h"
+#include "gui.h"
 
 typedef struct engine_data {
     graphics_data_t graphics_data;
@@ -20,5 +21,16 @@ typedef struct engine_data {
     audio_data_t audio_data;
     video_data_t video_data;
 } engine_data_t;
+
+engine_data_t *init_engine(const window_parameters_t *window_parameters);
+void free_engine(engine_data_t *engine_data);
+
+void engine_start_update(engine_data_t *engine_data);
+void engine_update_internal_systems(engine_data_t *engine_data);
+
+void engine_start_draw(engine_data_t *engine_data);
+void engine_draw_internal_systems_and_flip_video(engine_data_t *engine_data);
+
+void engine_end_update(engine_data_t *engine_data); 
 
 #endif //SDL_GAME_ENGINE_H

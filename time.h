@@ -15,6 +15,8 @@ typedef struct time_data {
     int target_frame_rate; // 0 for unclamped
 } time_data_t;
 
+void init_time_data(time_data_t *time_data);
+
 void start_frame(time_data_t *time_data);
 void end_frame(time_data_t *time_data);
 

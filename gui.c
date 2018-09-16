@@ -9,6 +9,16 @@
 #define INDEX_TO_CHAR(index) ((ushort) ((index) + 32))
 #define CHAR_TO_INDEX(ch) ((int) ((ch) - 32))
 
+bool init_gui() {
+    bool init_error = TTF_Init();
+    if (init_error) {
+        const char *error = TTF_GetError();
+        SDL_Log(error);
+    }
+    
+    return !init_error;
+}
+
 void init_font_from_file(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style) {
     
     font->font = load_font_from_file(font_path, font_size_in_points, font_style);

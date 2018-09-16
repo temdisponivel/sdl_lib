@@ -47,6 +47,11 @@ bool init_video(video_data_t *video_data, const window_parameters_t *parameters)
     strcpy(video_data->window_title, parameters->title);
 }
 
+void free_video(video_data_t *video_data) {
+    SDL_DestroyRenderer(video_data->sdl_renderer);
+    SDL_DestroyWindow(video_data->sdl_window);
+}
+
 void update_video_data(video_data_t *video_data) {
     
     if (video_data->dirty) {

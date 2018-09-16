@@ -20,7 +20,7 @@ else()
     
 endif()
 
-add_executable(sdl_game main.c graphics.h maths.h maths.c graphics.c engine.h input_system.h defines.h input.h input.c time.h time.c physics.h physics.c audio.h audio.c gui.h gui.c video.h video.c)
+add_executable(sdl_game main.c graphics.h maths.h maths.c graphics.c engine.h input_system.h defines.h input.h input.c time.h time.c physics.h physics.c audio.h audio.c gui.h gui.c video.h video.c engine.c)
 target_link_libraries(sdl_game ${LINK_FLAGS})
 
 file(COPY "${DEPS_FOLDER}/bin/${PLATAFORM}/required_dlls/" DESTINATION .)

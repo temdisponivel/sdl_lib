@@ -71,6 +71,8 @@ typedef struct button {
     color_t clicked_color;
 } button_t;
 
+bool init_gui();
+
 void init_font_from_file(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style);
 
 TTF_Font *load_font_from_file(const char *font_path, int size_in_points, FONT_STYLE font_style);

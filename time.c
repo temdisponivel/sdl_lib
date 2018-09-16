@@ -5,6 +5,11 @@
 #include "time.h"
 #include "defines.h"
 
+void init_time_data(time_data_t *time_data) {
+    time_data->time_scale = 1;
+    time_data->time = 0;
+}
+
 void start_frame(time_data_t *time_data) {
     float ticks = SDL_GetTicks() / 1000.f;
     time_data->_start_frame_time = ticks;

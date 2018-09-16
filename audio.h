@@ -56,6 +56,7 @@ typedef struct audio_data {
 } audio_data_t;
 
 bool init_audio(audio_data_t *audio_data);
+bool free_audio();
 
 sound_t load_sound_from_file(const char *file_path, SOUND_TYPE type);
 void destroy_sound(sound_t *sound);
