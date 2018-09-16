@@ -90,7 +90,8 @@ rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec
 
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
-sprite_t create_sprite(texture_t *texture, rect_t region);
+sprite_t create_sprite(texture_t *texture);
+sprite_t create_sprite_ex(texture_t *texture, rect_t region);
 
 // SPRITE ANIMATION
 

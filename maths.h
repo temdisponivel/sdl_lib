@@ -116,6 +116,8 @@ SDL_Rect convert_rect(rect_t rect);
 
 vec2_t normalize_rect_point(rect_t rect, vec2_t point);
 
+bool is_point_inside_rect(rect_t rect, vec2_t point);
+
 vec2_t denormalize_point(vec2_t region, vec2_t point);
 
 vec2_t get_normalized_pivot_point(PIVOT pivot);

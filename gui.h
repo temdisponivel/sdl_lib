@@ -9,6 +9,8 @@
 #include "SDL2/SDL_ttf.h"
 #include "maths.h"
 #include "graphics.h"
+#include "input.h"
+
 #define DEFAULT_FONT_SIZE 14
 #define DEFAULT_FONT_PATH "data/consola.ttf"
 
@@ -123,5 +125,25 @@ void setup_label_ex(
 void set_label_text(label_t *label, const char *text);
 
 void draw_label(SDL_Renderer *renderer, const label_t *label);
+
+bool draw_click_area_ex(
+        SDL_Renderer *renderer,
+
+        input_data_t *input_data,
+
+        vec2_t position,
+        vec2_t size,
+        sprite_t *normal_texture,
+        sprite_t *clicked_texture,
+
+        font_t *font,
+        color_t normal_text_color,
+        color_t clicked_text_color,
+
+        const char *text,
+
+        int text_size_in_points,
+        PIVOT text_pivot
+);
 
 #endif //SDL_GAME_TEXT_H

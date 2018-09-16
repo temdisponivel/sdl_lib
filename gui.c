@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include "gui.h"
+#include "input.h"
 
 #define INDEX_TO_CHAR(index) ((ushort) ((index) + 32))
 #define CHAR_TO_INDEX(ch) ((int) ((ch) - 32))
@@ -261,4 +262,61 @@ void draw_label(SDL_Renderer *renderer, const label_t *label) {
     }
     
     draw_gui_string_ex(renderer, label->font, label->position, max_size, label->text, label->color, label->text_size_in_points, label->pivot);
+}
+
+bool draw_click_area_ex(
+        SDL_Renderer *renderer,
+        
+        input_data_t *input_data,
+        
+        vec2_t position,
+        vec2_t size,
+        sprite_t *normal_texture,
+        sprite_t *clicked_texture,
+        
+        font_t *font,
+        color_t normal_text_color,
+        color_t clicked_text_color,
+        
+        const char *text,
+        
+        int text_size_in_points,
+        PIVOT pivot
+) {
+    vec2_t original_pos = position;
+    
+    vec2_t pivot_point = get_normalized_pivot_point(pivot);
+    vec2_t denormalized_pivot = denormalize_point(size, pivot_point);
+    
+    position = sub_vec2(position, denormalized_pivot);
+    
+    rect_t button_rect = get_rect(position, size);
+    vec2_t mouse_pos = input_data->mouse_pos;
+    
+    bool show_clicked_texture = false;
+    bool clicked = false;
+    if (is_button_holded(input_data, BUTTON_LEFT)) {
+        show_clicked_texture = is_point_inside_rect(button_rect, mouse_pos);
+    }
+
+
+    if (is_button_released(input_data, BUTTON_LEFT)) {
+        show_clicked_texture = is_point_inside_rect(button_rect, mouse_pos);
+        clicked = show_clicked_texture;
+    }
+    
+    color_t text_color;
+    sprite_t *sprite;
+    if (show_clicked_texture) {
+        sprite = clicked_texture;
+        text_color = clicked_text_color;
+    } else {
+        sprite = normal_texture;
+        text_color = normal_text_color;
+    }
+    
+    draw_texture_ex(renderer, button_rect, 0, sprite->texture_region, VEC2_ZERO, sprite->texture);
+    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+    
+    return clicked;
 }

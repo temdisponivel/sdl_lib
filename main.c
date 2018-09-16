@@ -51,7 +51,15 @@ int main(int handle, char **params) {
 
     texture_t texture_sheet;
     load_texture_from_file("data/sheet.png", renderer, &texture_sheet);
-
+    
+    texture_t button_normal_texture;
+    texture_t button_clicked_texture;
+    load_texture_from_file("data/button_normal.png", renderer, &button_normal_texture);
+    load_texture_from_file("data/button_clicked.png", renderer, &button_clicked_texture);
+    
+    sprite_t button_normal_sprite = create_sprite(&button_normal_texture);
+    sprite_t button_clicked_sprite = create_sprite(&button_clicked_texture);
+    
     camera_t camera;
     camera.transform.position = get_vec2(0, 0);
     graphics_data.camera = camera;
@@ -197,6 +205,24 @@ int main(int handle, char **params) {
         draw_label(renderer, &mouse_pos_label);
         draw_label(renderer, &message_label);
 
+        bool clicked = draw_click_area_ex(
+                renderer,
+                &input_data,
+                get_vec2(400, 300),
+                get_vec2(100, 50),
+                &button_normal_sprite,
+                &button_clicked_sprite,
+                &font,
+                COLOR_WHITE,
+                COLOR_BLACK,
+                "Click me!",
+                24,
+                PIVOT_CENTER
+        );
+        
+        if (clicked) {
+            SDL_Log("ALO!!");
+        }
         
         
         SDL_RenderPresent(renderer);

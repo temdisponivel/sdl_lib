@@ -78,7 +78,7 @@ sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t
     SDL_assert(graphics_data->renderers_count < MAX_RENDERERS);
 
     sprite_renderer_t *renderer = &graphics_data->renderers[graphics_data->renderers_count++];
-    renderer->sprite = create_sprite(texture, get_rect(VEC2_ZERO, texture->size));
+    renderer->sprite = create_sprite_ex(texture, get_rect(VEC2_ZERO, texture->size));
     renderer->transform = IDENTITY_TRANS;
     renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
     return renderer;
@@ -107,7 +107,12 @@ void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
     }
 }
 
-sprite_t create_sprite(texture_t *texture, rect_t region) {
+sprite_t create_sprite(texture_t *texture) {
+    rect_t region = get_rect(VEC2_ZERO, texture->size);
+    return create_sprite_ex(texture, region);
+}
+
+sprite_t create_sprite_ex(texture_t *texture, rect_t region) {
     sprite_t sprite;
     sprite.texture = texture;
     sprite.texture_region = region;
