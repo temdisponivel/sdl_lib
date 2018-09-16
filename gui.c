@@ -49,11 +49,12 @@ void destroy_font(TTF_Font *font) {
 }
 
 vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_size, int size_in_points) {
-
     vec2_t scale = get_vec2(size_in_points / font->size_in_points, size_in_points / font->size_in_points);
+    return get_text_total_size_ex(font, string, max_size, scale);
+}
 
-    max_size = mul_vec2(max_size, scale);
-    
+vec2_t get_text_total_size_ex(const font_t *font, const char *string, vec2_t scaled_max_size, vec2_t scale) {
+
     vec2_t current_size = {};
     vec2_t text_size = {};
     size_t len = strlen(string);
@@ -76,8 +77,8 @@ vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_si
         float desired_x = current_size.x + size.x; 
         float desired_y = current_size.y + size.y;
         
-        if (desired_x > max_size.x) {
-            text_size.x = max_size.x;
+        if (desired_x > scaled_max_size.x) {
+            text_size.x = scaled_max_size.x;
             
             current_size.y += line_spacing;
             current_size.x = 0;
@@ -86,8 +87,8 @@ vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_si
             text_size.x = fmaxf(text_size.x, current_size.x);
         }
         
-        if (desired_y > max_size.y)
-            current_size.y = max_size.y;
+        if (desired_y > scaled_max_size.y)
+            current_size.y = scaled_max_size.y;
     }
     
     text_size.y = current_size.y;
@@ -95,11 +96,10 @@ vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_si
 }
 
 void get_string_draw_actions(
-        const font_t *font, 
         vec2_t current_total_size, 
-        char current_char, 
-        vec2_t max_size,
-        int size_in_points,
+        char current_char,
+        vec2_t current_char_tex_size_scaled,
+        vec2_t scaled_max_size,
         bool *break_line, 
         bool *stop_drawing, 
         bool *skip_current_character
@@ -108,20 +108,12 @@ void get_string_draw_actions(
         *break_line = true;
         *skip_current_character = true;
         *stop_drawing = false;
-    } else {
-        vec2_t scale = get_vec2(size_in_points / font->size_in_points, size_in_points / font->size_in_points);
-        
-        max_size = mul_vec2(max_size, scale);
-        
-        int texture_index = CHAR_TO_INDEX(current_char);
-        texture_t current_char_tex = font->characters[texture_index];
-        
-        vec2_t tex_size = current_char_tex.size;
-        tex_size = mul_vec2(tex_size, scale);
+    } else {        
+        vec2_t tex_size = current_char_tex_size_scaled;
 
-        bool can_draw_on_next_line = current_total_size.height + tex_size.height < max_size.height;
+        bool can_draw_on_next_line = current_total_size.height + tex_size.height < scaled_max_size.height;
 
-        if (current_total_size.width + tex_size.width > max_size.width) {
+        if (current_total_size.width + tex_size.width > scaled_max_size.width) {
             *break_line = can_draw_on_next_line;
             *stop_drawing = !can_draw_on_next_line;
             *skip_current_character = false;
@@ -140,14 +132,13 @@ void draw_gui_string_ex(
         vec2_t max_size,
         const char *string,
         color_t color,
-        float angle,
         int size_in_points,
         PIVOT pivot
 ) {
     vec2_t scale = get_vec2(size_in_points / font->size_in_points, size_in_points / font->size_in_points);
+    vec2_t scaled_max_size = mul_vec2(max_size, scale);
 
-    vec2_t size = get_text_total_size(font, string, max_size, size_in_points);
-    //size = min_vec2(size, max_size);
+    vec2_t size = get_text_total_size_ex(font, string, scaled_max_size, scale);
 
     rect_t full_text_rect = get_rect(VEC2_ZERO, size);
 
@@ -166,11 +157,15 @@ void draw_gui_string_ex(
     for (int i = 0; i < len; ++i) {
         char ch = string[i];
 
+        int texture_index = CHAR_TO_INDEX(ch);
+        texture_t texture = font->characters[texture_index];
+        vec2_t scaled_tex_size = mul_vec2(texture.size, scale);
+
         bool skip_current_char;
         bool stop_drawing;
         bool break_line;
 
-        get_string_draw_actions(font, current_text_size, ch, max_size, size_in_points, &break_line, &stop_drawing, &skip_current_char);
+        get_string_draw_actions(current_text_size, ch, scaled_tex_size, scaled_max_size, &break_line, &stop_drawing, &skip_current_char);
 
         if (stop_drawing) {
             break;
@@ -188,18 +183,12 @@ void draw_gui_string_ex(
             }
         }
 
-        int texture_index = CHAR_TO_INDEX(ch);
-        texture_t texture = font->characters[texture_index];
+        rect_t full_texture_rect = get_rect(VEC2_ZERO, scaled_tex_size);
+        rect_t screen_rect = get_rect(draw_pos, scaled_tex_size);
 
-        rect_t full_texture_rect = get_rect(VEC2_ZERO, texture.size);
-
-        rect_t screen_rect = get_rect(draw_pos, texture.size);
-        screen_rect.size = mul_vec2(screen_rect.size, scale);
+        draw_texture_ex(renderer, screen_rect, 0, full_texture_rect, VEC2_ZERO, &texture);
 
         current_text_size.width += screen_rect.size.width;
-
-        draw_texture_ex(renderer, screen_rect, angle, full_texture_rect, VEC2_ZERO, &texture);
-
         draw_pos.x += screen_rect.size.width;
     }
 }
@@ -208,12 +197,13 @@ void draw_world_string(
         SDL_Renderer *renderer,
         const font_t *font,
         const camera_t *camera,
-        const transform_t *transform,
+        vec2_t world_pos,
         vec2_t max_size,
         const char *string,
-        float angle,
-        color_t color
+        color_t color,
+        int size_in_points,
+        PIVOT pivot
 ) {
-    vec2_t screen_pos = sub_vec2(camera->transform.world_pos, transform->world_pos);
-    
+    vec2_t screen_pos = sub_vec2(world_pos, camera->transform.world_pos);
+    draw_gui_string_ex(renderer, font, screen_pos, max_size, string, color, size_in_points, pivot);
 }

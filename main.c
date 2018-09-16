@@ -245,12 +245,12 @@ int main(int handle, char **params) {
         draw_physics_debug(renderer, &physics_data);
         update_audio_data(&audio_data, &time_data);
 
-        draw_gui_string_ex(renderer, &gui_data, get_vec2(400, 300), RESIZE_HEIGHT(100), "Hello, my friend! This is a very long text! 45454554", COLOR_RED, 0, 54, PIVOT_CENTER);
+        draw_world_string(renderer, &gui_data, &graphics_data.camera, graphics_data.renderers[1].transform.world_pos, RESIZE_HEIGHT(100), "Hello, my friend! This is a very long text! 45454554", COLOR_RED, 54, PIVOT_CENTER);
 
         
         char mouse_pos_text[128];
         sprintf(mouse_pos_text, "x: %f - y: %f", input_data.mouse_pos.x, input_data.mouse_pos.y);
-        draw_gui_string_ex(renderer, &gui_data, get_vec2(800, 600), RESIZE_TO_FIT, mouse_pos_text, COLOR_RED, 0, DEFAULT_FONT_SIZE, PIVOT_BOTTOM_RIGHT);
+        draw_gui_string_ex(renderer, &gui_data, get_vec2(800, 600), RESIZE_TO_FIT, mouse_pos_text, COLOR_RED, DEFAULT_FONT_SIZE, PIVOT_BOTTOM_RIGHT);
 /*
         SDL_Color color;
         color.r = 255;

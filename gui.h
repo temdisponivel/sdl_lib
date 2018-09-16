@@ -41,14 +41,15 @@ void destroy_font(TTF_Font *font);
 
 vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_size, int size_in_points);
 
+vec2_t get_text_total_size_ex(const font_t *font, const char *string, vec2_t scaled_max_size, vec2_t scale);
+
 void draw_gui_string_ex(
         SDL_Renderer *renderer, 
         const font_t *font, 
         vec2_t screen_pos, 
         vec2_t max_size, 
         const char *string, 
-        color_t color, 
-        float angle,
+        color_t color,
         int size_in_points,
         PIVOT pivot
 );
@@ -57,11 +58,12 @@ void draw_world_string(
         SDL_Renderer *renderer, 
         const font_t *font, 
         const camera_t *camera, 
-        const transform_t *transform, 
+        vec2_t world_pos, 
         vec2_t max_size, 
-        const char *string, 
-        float angle,
-        color_t color
+        const char *string,
+        color_t color,
+        int size_in_points,
+        PIVOT pivot
 );
 
 #endif //SDL_GAME_TEXT_H
