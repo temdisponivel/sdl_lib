@@ -41,7 +41,7 @@ typedef struct sprite_animation {
 typedef struct sprite_renderer {
     sprite_t sprite;
     
-    transform_t transform;
+    transform_t *transform;
     vec2_t normalized_pivot;
     
     int depth_inside_layer;
@@ -99,6 +99,8 @@ void draw_texture_ex(
 );
 
 void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const sprite_renderer_t *tex_renderer);
+
+sprite_renderer_t *get_sprite_renderer_empty(graphics_data_t *graphics_data);
 
 sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture);
 

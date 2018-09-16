@@ -16,6 +16,11 @@ void load_texture_from_file(const char *file_path, SDL_Renderer *renderer, textu
     int width, height;
     int channels;
     stbi_uc *data = stbi_load(file_path, &width, &height, &channels, GET_CHANNELS_FROM_IMAGE);
+    
+    if (data == null) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Couldn't load texture at path: '%s'", file_path);
+        SDL_assert(false);
+    }
 
     uint format;
     if (channels == 3) {
@@ -64,25 +69,34 @@ void draw_texture_ex(
 
 
 void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const sprite_renderer_t *tex_renderer) {
+    
+    SDL_assert(tex_renderer->transform != null);
+    
     rect_t tex_region = tex_renderer->sprite.texture_region;
-    vec2_t screen_size = mul_vec2(tex_region.size, tex_renderer->transform.scale);
+    vec2_t screen_size = mul_vec2(tex_region.size, tex_renderer->transform->scale);
     vec2_t pivot = denormalize_point(screen_size, tex_renderer->normalized_pivot);
-    vec2_t world_pos = sub_vec2(tex_renderer->transform.position, pivot);
+    vec2_t world_pos = sub_vec2(tex_renderer->transform->position, pivot);
     rect_t screen_region = get_rect(world_pos, screen_size);
-    float angle = tex_renderer->transform.angle - camera->transform.angle;
+    float angle = tex_renderer->transform->angle - camera->transform.angle;
     
     draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->sprite.texture);
 }
 
-sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture) {
+sprite_renderer_t *get_sprite_renderer_empty(graphics_data_t *graphics_data) {
     SDL_assert(graphics_data->renderers_count < MAX_RENDERERS);
-
     sprite_renderer_t *renderer = &graphics_data->renderers[graphics_data->renderers_count++];
-    renderer->sprite = create_sprite_ex(texture, get_rect(VEC2_ZERO, texture->size));
-    renderer->transform = IDENTITY_TRANS;
+    sprite_t sprite = {};
+    renderer->sprite = sprite;
+    renderer->transform = null;
     renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
     renderer->depth_inside_layer = 0;
     renderer->layer = FIRST_LAYER;
+    return renderer;
+}
+
+sprite_renderer_t *get_sprite_renderer(graphics_data_t *graphics_data, texture_t *texture) {
+    sprite_renderer_t *renderer = get_sprite_renderer_empty(graphics_data);
+    renderer->sprite = create_sprite_ex(texture, get_rect(VEC2_ZERO, texture->size));
     return renderer;
 }
 

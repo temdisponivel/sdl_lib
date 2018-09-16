@@ -1,24 +1,11 @@
 #include "engine.h"
-#include "graphics.h"
-#include "maths.h"
-#include "input.h"
-#include "time.h"
-#include "physics.h"
-#include "SDL2/SDL_mixer.h"
-#include "audio.h"
-#include "SDL2/SDL_ttf.h"
-#include "gui.h"
 #include "stdio.h"
 
-int main(int handle, char **params) {
+//int main(int handle, char **params) {
+void not_main() {
 
     window_parameters_t win_params;
-    win_params.resolution = get_vec2(800, 600);
-    win_params.full_screen = false;
-    win_params.resizable = false;
-    win_params.clear_color = COLOR_RED;
-    win_params.v_sync_on = false;
-    win_params.title = "SDL!";
+    fill_default_window_parameters(&win_params);
     
     engine_data_t *engine_data = init_engine(&win_params);
 
@@ -64,8 +51,8 @@ int main(int handle, char **params) {
     
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         sprite_renderer_t *tex_renderer = get_sprite_renderer(graphics_data, &texture);
-        tex_renderer->transform.position = get_vec2(0, 0);
-        tex_renderer->transform.scale = get_vec2(.5f, .5f);
+        tex_renderer->transform->position = get_vec2(0, 0);
+        tex_renderer->transform->scale = get_vec2(.5f, .5f);
         tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
         
         if (i == 0)
@@ -146,7 +133,7 @@ int main(int handle, char **params) {
         }
 
         source->position = sum_vec2(source->position, to_add);
-        second_renderer->transform.position = sum_vec2(second_renderer->transform.position, to_add);
+        second_renderer->transform->position = sum_vec2(second_renderer->transform->position, to_add);
         
         if (is_key_pressed(input_data, KEY_p)) {
             first_animation.playing = !first_animation.playing;
@@ -162,7 +149,7 @@ int main(int handle, char **params) {
             reset_animation(&first_animation);
         }
 
-        first_renderer->transform.position = input_data->mouse_pos;
+        first_renderer->transform->position = input_data->mouse_pos;
         audio_data->listener.position = input_data->mouse_pos;
 
         engine_start_draw(engine_data);
@@ -195,7 +182,7 @@ int main(int handle, char **params) {
         button.size = get_label_drawing_size(&button.label);
         
         //draw_label(renderers, get_vec2(800, 600), &mouse_pos_label);
-        draw_label(renderer, second_renderer->transform.position, &message_label);
+        draw_label(renderer, second_renderer->transform->position, &message_label);
         
         bool clicked = draw_click_area_sprites_ex(
                 renderer,
@@ -277,6 +264,8 @@ int main(int handle, char **params) {
         engine_draw_internal_systems_and_flip_video(engine_data);
         engine_end_update(engine_data);
     }
+    
+    free_engine(engine_data);
 
     return 0;
 }

@@ -27,8 +27,10 @@ engine_data_t *init_engine(const window_parameters_t *window_parameters) {
 }
 
 void free_engine(engine_data_t *engine_data) {
-    free_audio();
-    free_video();
+    //Audio will be automatically freed when SDL_Quit is called
+    // free_audio();
+    
+    free_video(&engine_data->video_data);
     
     SDL_Quit();
 }
@@ -60,4 +62,8 @@ void engine_draw_internal_systems_and_flip_video(engine_data_t *engine_data) {
 
 void engine_end_update(engine_data_t *engine_data) {
     end_frame(&engine_data->time_data);
+}
+
+bool engine_should_quit(engine_data_t *engine_data) {
+    return engine_data->input_data.quit_event_called;
 }

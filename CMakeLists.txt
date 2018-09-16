@@ -7,6 +7,7 @@ set(DEPS_FOLDER ${CMAKE_SOURCE_DIR}/deps)
 
 include_directories(${DEPS_FOLDER}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/engine)
 
 set(PLATAFORM x86_64)
 
@@ -20,7 +21,7 @@ else()
     
 endif()
 
-add_executable(sdl_game main.c graphics.h maths.h maths.c graphics.c engine.h input_system.h defines.h input.h input.c time.h time.c physics.h physics.c audio.h audio.c gui.h gui.c video.h video.c engine.c)
+add_executable(sdl_game main.c engine/graphics.h engine/maths.h engine/maths.c engine/graphics.c engine/engine.h engine/input_system.h engine/defines.h engine/input.h engine/input.c engine/time.h engine/time.c engine/physics.h engine/physics.c engine/audio.h engine/audio.c engine/gui.h engine/gui.c engine/video.h engine/video.c engine/engine.c pong.c)
 target_link_libraries(sdl_game ${LINK_FLAGS})
 
 file(COPY "${DEPS_FOLDER}/bin/${PLATAFORM}/required_dlls/" DESTINATION .)

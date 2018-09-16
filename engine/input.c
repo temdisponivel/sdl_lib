@@ -751,12 +751,12 @@ STATE combine_key_state(STATE last_frame, STATE current_frame) {
 
         if (last_frame == STATE_NORMAL || last_frame == STATE_RELEASED)
             return STATE_PRESSED;
-        else if (last_frame == STATE_HOLDED || last_frame == STATE_PRESSED)
-            return STATE_HOLDED;
+        else if (last_frame == STATE_HELD || last_frame == STATE_PRESSED)
+            return STATE_HELD;
 
     } else if (current_frame == STATE_RELEASED) {
 
-        if (last_frame == STATE_HOLDED || last_frame == STATE_PRESSED)
+        if (last_frame == STATE_HELD || last_frame == STATE_PRESSED)
             return STATE_RELEASED;
         else if (last_frame == STATE_NORMAL || last_frame == STATE_RELEASED)
             return STATE_NORMAL;
@@ -883,9 +883,9 @@ bool is_key_pressed(input_data_t *input_data, KEY key) {
     return state == STATE_PRESSED;
 }
 
-bool is_key_holded(input_data_t *input_data, KEY key) {
+bool is_key_held(input_data_t *input_data, KEY key) {
     STATE state = get_key_state(input_data, key);
-    return state == STATE_HOLDED;
+    return state == STATE_HELD;
 }
 
 bool is_key_released(input_data_t *input_data, KEY key) {
@@ -905,7 +905,7 @@ bool is_button_pressed(input_data_t *input_data, BUTTON button) {
 
 bool is_button_holded(input_data_t *input_data, BUTTON button) {
     mouse_button_state_t state = get_button_state(input_data, button);
-    return state.state == STATE_HOLDED;
+    return state.state == STATE_HELD;
 }
 
 bool is_button_released(input_data_t *input_data, BUTTON button) {

@@ -31,6 +31,8 @@ void engine_update_internal_systems(engine_data_t *engine_data);
 void engine_start_draw(engine_data_t *engine_data);
 void engine_draw_internal_systems_and_flip_video(engine_data_t *engine_data);
 
-void engine_end_update(engine_data_t *engine_data); 
+void engine_end_update(engine_data_t *engine_data);
+
+bool engine_should_quit(engine_data_t *engine_data);
 
 #endif //SDL_GAME_ENGINE_H

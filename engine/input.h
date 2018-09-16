@@ -11,7 +11,7 @@
 typedef enum {
     STATE_NORMAL,
     STATE_PRESSED,
-    STATE_HOLDED,
+    STATE_HELD,
     STATE_RELEASED,
 } STATE;
 
@@ -317,7 +317,7 @@ int get_click_count(input_data_t *input_data, BUTTON button);
 
 bool is_key_normal(input_data_t *input_data, KEY key);
 bool is_key_pressed(input_data_t *input_data, KEY key);
-bool is_key_holded(input_data_t *input_data, KEY key);
+bool is_key_held(input_data_t *input_data, KEY key);
 bool is_key_released(input_data_t *input_data, KEY key);
 
 bool is_button_normal(input_data_t *input_data, BUTTON button);

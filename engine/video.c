@@ -5,6 +5,15 @@
 #include "video.h"
 #include "graphics.h"
 
+void fill_default_window_parameters(window_parameters_t *parameters) {
+    parameters->resolution = get_vec2(800, 600);
+    parameters->full_screen = false;
+    parameters->resizable = false;
+    parameters->clear_color = COLOR_BLACK;
+    parameters->v_sync_on = false;
+    parameters->title = "SDL!";
+}
+
 bool init_video(video_data_t *video_data, const window_parameters_t *parameters) {
     
     int flags = SDL_WINDOW_OPENGL;
