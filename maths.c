@@ -2,6 +2,7 @@
 // Created by matheus on 12/09/2018.
 //
 
+#include <math.h>
 #include "maths.h"
 
 vec2_t get_vec2(float x, float y) {
@@ -9,6 +10,21 @@ vec2_t get_vec2(float x, float y) {
     vec.x = x;
     vec.y = y;
     return vec;
+}
+
+vec2_t max_vec2(vec2_t a, vec2_t b) {
+    vec2_t result;
+    result.x = fmaxf(a.x, b.x);
+    result.y = fmaxf(a.y, b.y);
+    return result;
+}
+
+
+vec2_t min_vec2(vec2_t a, vec2_t b) {
+    vec2_t result;
+    result.x = fminf(a.x, b.x);
+    result.y = fminf(a.y, b.y);
+    return result;
 }
 
 vec2_t sum_vec2(vec2_t a, vec2_t b) {
@@ -97,12 +113,6 @@ vec2_t denormalize_rect_point(rect_t rect, vec2_t point) {
     return result;
 }
 
-vec2_t get_rect_pivot(rect_t rect, PIVOT pivot) {
-    vec2_t normalized_pivot = get_normalized_pivot_point(pivot);
-    vec2_t denormalized_pivot = denormalize_rect_point(rect, normalized_pivot);
-    return denormalized_pivot;
-}
-
 rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normalized_pivot) {
     vec2_t screen_size = mul_vec2(size, scale);
 
@@ -111,6 +121,12 @@ rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normal
 
     rect_t screen_region = get_rect(world_pos, screen_size);
     return screen_region;
+}
+
+vec2_t get_pivot_point(rect_t rect, PIVOT pivot) {
+    vec2_t normalized = get_normalized_pivot_point(pivot);
+    vec2_t denormalized = denormalize_rect_point(rect, normalized);
+    return denormalized;
 }
 
 

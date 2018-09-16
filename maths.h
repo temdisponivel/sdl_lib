@@ -84,6 +84,10 @@ typedef struct interpolation {
 
 vec2_t get_vec2(float x, float h);
 
+vec2_t max_vec2(vec2_t a, vec2_t b);
+
+vec2_t min_vec2(vec2_t a, vec2_t b);
+
 vec2_t sum_vec2(vec2_t a, vec2_t b);
 
 vec2_t sub_vec2(vec2_t a, vec2_t b);
@@ -110,9 +114,9 @@ vec2_t normalize_rect_point(rect_t rect, vec2_t point);
 
 vec2_t denormalize_rect_point(rect_t rect, vec2_t point);
 
-vec2_t get_rect_pivot(rect_t rect, PIVOT pivot);
-
 rect_t calculate_rect(vec2_t world_pos, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
+
+vec2_t get_pivot_point(rect_t rect, PIVOT pivot);
 
 vec2_t get_normalized_pivot_point(PIVOT pivot);
 

@@ -7,6 +7,7 @@
 #include "SDL2/SDL_mixer.h"
 #include "audio.h"
 #include "SDL2/SDL_ttf.h"
+#include "gui.h"
 
 rect_t get_sprite_screen_region(sprite_renderer_t *tex_renderer) {
     vec2_t world_pos = tex_renderer->transform.world_pos;
@@ -50,7 +51,8 @@ int main(int handle, char **params) {
     time_data_t time_data = {};
     physics_data_t physics_data = {};
     audio_data_t audio_data = {};
-
+    gui_data_t gui_data = {};
+    
     bool inited = init_audio(&audio_data);
     SDL_assert(inited);
 
@@ -74,6 +76,8 @@ int main(int handle, char **params) {
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+    init_gui_data(renderer, &gui_data, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE);
 
     texture_t texture;
     load_texture_from_file("data/image.png", renderer, &texture);
@@ -242,13 +246,15 @@ int main(int handle, char **params) {
         draw_physics_debug(renderer, &physics_data);
         update_audio_data(&audio_data, &time_data);
 
-
+        draw_gui_string(renderer, &gui_data, get_vec2(400, 300), RESIZE_HEIGHT(100), "Hello, my friend! This is a very long text! 45454554", COLOR_RED, PIVOT_BOTTOM_LEFT);
+/*
         SDL_Color color;
         color.r = 255;
         color.g = 0;
         color.b = 0;
         color.a = 255;
         SDL_Surface *text_surface = TTF_RenderText_Solid(font, "Hello, my friend!", color);
+        SDL_Log("format: %i", text_surface->format->format);
         SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
 
         rect_t text_rect = get_rect(get_vec2(100, 100), get_vec2(text_surface->w, text_surface->h));
@@ -257,6 +263,7 @@ int main(int handle, char **params) {
 
         SDL_FreeSurface(text_surface);
         SDL_DestroyTexture(text_texture);
+*/
         
         SDL_RenderPresent(renderer);
 
