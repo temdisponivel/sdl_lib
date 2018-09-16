@@ -181,7 +181,12 @@ bool collide_circles(circle_t circle_a, circle_t circle_b) {
 }
 
 bool collide_rect_circle(rect_t box, circle_t circle) {
-    rect_t circle_rect = get_rect(circle.position, get_vec2(circle.radius, circle.radius));
+    float width = circle.radius * 2;
+    vec2_t size = get_vec2(width, width);
+    vec2_t half_size = div_vec2(size, 2.f);
+    vec2_t position = sub_vec2(circle.position, half_size);
+    rect_t circle_rect = get_rect(position, size);
+    
     return collide_rects(box, circle_rect);
 }
 
