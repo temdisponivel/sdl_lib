@@ -67,14 +67,13 @@ void update_collider_pos_based_on_renderer(const sprite_renderer_t *sprite_rende
                 pivot
         );
 
-        // Circles always use the center pivot
         vec2_t center_pivot = get_normalized_pivot_point(PIVOT_CENTER);
         
         vec2_t center_of_drawing = denormalize_point(sprite_rect.size, center_pivot);
         center_of_drawing = sum_vec2(center_of_drawing, sprite_rect.position);
         
         collider->position = center_of_drawing;
-        collider->circle_radius = sprite_rect.size.x;
+        collider->circle_radius = sprite_rect.size.width / 2.f;
     }
 }
 
