@@ -232,7 +232,6 @@ void setup_label(label_t *label, font_t *font, const char *text, color_t color) 
 }
 
 void setup_label_ex(label_t *label, vec2_t position, font_t *font, const char *text, color_t color, PIVOT pivot, int text_size_in_points, LABEL_RESIZE_MODE resize_mode) {
-    label->position = position;
     label->font = font;
     set_label_text(label, text);
     label->color = color;
@@ -247,7 +246,7 @@ void set_label_text(label_t *label, const char *text) {
     strcpy(label->text, text);
 }
 
-void draw_label(SDL_Renderer *renderer, const label_t *label) {
+void draw_label(SDL_Renderer *renderer, vec2_t position, const label_t *label) {
     vec2_t max_size;
     switch (label->resize_mode) {
         case LABEL_RESIZE_TO_FIT:
@@ -261,62 +260,183 @@ void draw_label(SDL_Renderer *renderer, const label_t *label) {
             break;
     }
     
-    draw_gui_string_ex(renderer, label->font, label->position, max_size, label->text, label->color, label->text_size_in_points, label->pivot);
+    draw_gui_string_ex(renderer, label->font, position, max_size, label->text, label->color, label->text_size_in_points, label->pivot);
 }
 
-bool draw_click_area_ex(
+bool setup_base_click_area(input_data_t *input_data, vec2_t position, vec2_t size, PIVOT pivot, bool *clicked, bool *hovered, bool *released, rect_t *button_rect) {
+    vec2_t pivot_point = get_normalized_pivot_point(pivot);
+    vec2_t denormalized_pivot = denormalize_point(size, pivot_point);
+
+    position = sub_vec2(position, denormalized_pivot);
+
+    *button_rect = get_rect(position, size);
+    
+    vec2_t mouse_pos = input_data->mouse_pos;
+
+    *hovered = false;
+    *clicked = false;
+    *released = false;
+    if (is_button_holded(input_data, BUTTON_LEFT)) {
+        *clicked = is_point_inside_rect(*button_rect, mouse_pos);
+    } else if (is_button_released(input_data, BUTTON_LEFT)) {
+        *released = is_point_inside_rect(*button_rect, mouse_pos);
+    } else {
+        *hovered = is_point_inside_rect(*button_rect, mouse_pos);
+    }
+
+    if (*released)
+        *clicked = true;
+}
+
+bool draw_click_area_sprites_ex(
         SDL_Renderer *renderer,
-        
+
         input_data_t *input_data,
-        
+
         vec2_t position,
         vec2_t size,
-        sprite_t *normal_texture,
-        sprite_t *clicked_texture,
-        
+
+        sprite_t *normal_sprite,
+        sprite_t *hover_sprite,
+        sprite_t *clicked_sprite,
+
         font_t *font,
         color_t normal_text_color,
         color_t clicked_text_color,
-        
+
         const char *text,
-        
+
         int text_size_in_points,
         PIVOT pivot
 ) {
     vec2_t original_pos = position;
     
-    vec2_t pivot_point = get_normalized_pivot_point(pivot);
-    vec2_t denormalized_pivot = denormalize_point(size, pivot_point);
-    
-    position = sub_vec2(position, denormalized_pivot);
-    
-    rect_t button_rect = get_rect(position, size);
-    vec2_t mouse_pos = input_data->mouse_pos;
-    
-    bool show_clicked_texture = false;
+    bool hovered = false;
     bool clicked = false;
-    if (is_button_holded(input_data, BUTTON_LEFT)) {
-        show_clicked_texture = is_point_inside_rect(button_rect, mouse_pos);
-    }
-
-
-    if (is_button_released(input_data, BUTTON_LEFT)) {
-        show_clicked_texture = is_point_inside_rect(button_rect, mouse_pos);
-        clicked = show_clicked_texture;
-    }
+    bool released = false;
     
+    rect_t button_rect;
+    setup_base_click_area(input_data, position, size, pivot, &clicked, &hovered, &released, &button_rect);
+        
     color_t text_color;
     sprite_t *sprite;
-    if (show_clicked_texture) {
-        sprite = clicked_texture;
+    if (hovered) {
+        sprite = hover_sprite;
+        text_color = normal_text_color;
+    } else if (clicked) {
+        sprite = clicked_sprite;
         text_color = clicked_text_color;
     } else {
-        sprite = normal_texture;
+        sprite = normal_sprite;
         text_color = normal_text_color;
     }
     
     draw_texture_ex(renderer, button_rect, 0, sprite->texture_region, VEC2_ZERO, sprite->texture);
     draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
     
-    return clicked;
+    return released;
+}
+
+bool draw_click_area_colored_sprites_ex(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+
+        vec2_t position,
+        vec2_t size,
+
+        sprite_t *sprite,
+
+        color_t normal_color,
+        color_t hover_color,
+        color_t click_color,
+
+        font_t *font,
+
+        color_t normal_text_color,
+        color_t clicked_text_color,
+        
+        const char *text,
+
+        int text_size_in_points,
+
+        PIVOT pivot
+) {
+    vec2_t original_pos = position;
+
+    bool hovered = false;
+    bool clicked = false;
+    bool released = false;
+
+    rect_t button_rect;
+    setup_base_click_area(input_data, position, size, pivot, &clicked, &hovered, &released, &button_rect);
+
+    color_t text_color;
+    color_t sprite_color;
+    if (hovered) {
+        sprite_color = hover_color;
+        text_color = normal_text_color;
+    } else if (clicked) {
+        sprite_color = click_color;
+        text_color = clicked_text_color;
+    } else {
+        sprite_color = normal_color;
+        text_color = normal_text_color;
+    }
+    
+    SDL_SetTextureColorMod(sprite->texture->handle, sprite_color.red, sprite_color.green, sprite_color.blue);
+
+    draw_texture_ex(renderer, button_rect, 0, sprite->texture_region, VEC2_ZERO, sprite->texture);
+    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+
+    return released;
+}
+
+bool draw_click_area_color_ex(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+
+        vec2_t position,
+        vec2_t size,
+
+        color_t normal_color,
+        color_t hover_color,
+        color_t click_color,
+
+        font_t *font,
+
+        color_t normal_text_color,
+        color_t clicked_text_color,
+        
+        const char *text,
+
+        int text_size_in_points,
+
+        PIVOT pivot
+) {
+    vec2_t original_pos = position;
+
+    bool hovered = false;
+    bool clicked = false;
+    bool released = false;
+
+    rect_t button_rect;
+    setup_base_click_area(input_data, position, size, pivot, &clicked, &hovered, &released, &button_rect);
+
+    color_t text_color;
+    color_t rect_color;
+    if (hovered) {
+        rect_color = hover_color;
+        text_color = normal_text_color;
+    } else if (clicked) {
+        rect_color = click_color;
+        text_color = clicked_text_color;
+    } else {
+        rect_color = normal_color;
+        text_color = normal_text_color;
+    }
+
+    debug_draw_fill_rect(renderer, button_rect, rect_color);
+    draw_gui_string_ex(renderer, font, original_pos, size, text, text_color, text_size_in_points, pivot);
+
+    return released;
 }

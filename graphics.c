@@ -237,3 +237,11 @@ void debug_draw_rect(SDL_Renderer *renderer, rect_t rect, color_t color) {
     SDL_Rect sdl_rect = convert_rect(rect);
     SDL_RenderDrawRect(renderer, &sdl_rect);
 }
+
+void debug_draw_fill_rect(SDL_Renderer *renderer, rect_t rect, color_t color) {
+    SDL_Color sdl_color = convert_color(color);
+    SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
+
+    SDL_Rect sdl_rect = convert_rect(rect);
+    SDL_RenderFillRect(renderer, &sdl_rect);
+}

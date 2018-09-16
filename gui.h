@@ -45,7 +45,6 @@ typedef struct font {
 } font_t;
 
 typedef struct label {
-    vec2_t position;
     font_t *font;
     char text[MAX_LABEL_STRING_LEN];
     color_t color;
@@ -59,6 +58,18 @@ typedef struct label {
         vec2_t max_size;
     };
 } label_t;
+
+typedef struct button {
+    label_t label;
+    vec2_t size;
+    
+    PIVOT pivot;
+    
+    sprite_t sprite;
+    color_t normal_color;
+    color_t hover_color;
+    color_t clicked_color;
+} button_t;
 
 void init_font_from_file(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style);
 
@@ -124,17 +135,19 @@ void setup_label_ex(
 
 void set_label_text(label_t *label, const char *text);
 
-void draw_label(SDL_Renderer *renderer, const label_t *label);
-
-bool draw_click_area_ex(
+void draw_label(SDL_Renderer *renderer, vec2_t position, const label_t *label);
+        
+bool draw_click_area_sprites_ex(
         SDL_Renderer *renderer,
 
         input_data_t *input_data,
 
         vec2_t position,
         vec2_t size,
-        sprite_t *normal_texture,
-        sprite_t *clicked_texture,
+
+        sprite_t *normal_sprite,
+        sprite_t *hover_sprite,
+        sprite_t *clicked_sprite,
 
         font_t *font,
         color_t normal_text_color,
@@ -144,6 +157,55 @@ bool draw_click_area_ex(
 
         int text_size_in_points,
         PIVOT text_pivot
+);
+
+
+bool draw_click_area_colored_sprites_ex(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+
+        vec2_t position,
+        vec2_t size,
+
+        sprite_t *sprite,
+
+        color_t normal_color,
+        color_t hover_color,
+        color_t click_color,
+
+        font_t *font,
+        
+        color_t normal_text_color,
+        color_t clicked_text_color,
+        
+        const char *text,
+        
+        int text_size_in_points,
+
+        PIVOT pivot
+);
+        
+bool draw_click_area_color_ex(
+        SDL_Renderer *renderer,
+        input_data_t *input_data,
+
+        vec2_t position,
+        vec2_t size,
+
+        color_t normal_color,
+        color_t hover_color,
+        color_t click_color,
+
+        font_t *font,
+
+        color_t normal_text_color,
+        color_t clicked_text_color,
+        
+        const char *text,
+
+        int text_size_in_points,
+
+        PIVOT pivot
 );
 
 #endif //SDL_GAME_TEXT_H

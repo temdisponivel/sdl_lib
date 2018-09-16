@@ -53,11 +53,14 @@ int main(int handle, char **params) {
     load_texture_from_file("data/sheet.png", renderer, &texture_sheet);
     
     texture_t button_normal_texture;
+    texture_t button_normal2_texture;
     texture_t button_clicked_texture;
     load_texture_from_file("data/button_normal.png", renderer, &button_normal_texture);
+    load_texture_from_file("data/button_normal.png", renderer, &button_normal2_texture);
     load_texture_from_file("data/button_clicked.png", renderer, &button_clicked_texture);
     
     sprite_t button_normal_sprite = create_sprite(&button_normal_texture);
+    sprite_t button_normal2_sprite = create_sprite(&button_normal2_texture);
     sprite_t button_clicked_sprite = create_sprite(&button_clicked_texture);
     
     camera_t camera;
@@ -123,7 +126,6 @@ int main(int handle, char **params) {
     label_t mouse_pos_label;
     setup_label(&mouse_pos_label, &font, "", COLOR_BLUE);
     mouse_pos_label.pivot = PIVOT_BOTTOM_RIGHT;
-    mouse_pos_label.position = get_vec2(800, 600);
     
     label_t message_label;
     setup_label(&message_label, &font, "Hello, is anybody there?", COLOR_RED);
@@ -168,7 +170,6 @@ int main(int handle, char **params) {
 
         first_renderer->transform.position = input_data.mouse_pos;
         audio_data.listener.position = input_data.mouse_pos;
-        message_label.position = second_renderer->transform.position;
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -202,16 +203,37 @@ int main(int handle, char **params) {
         sprintf(mouse_pos_text, "x: %f - y: %f", input_data.mouse_pos.x, input_data.mouse_pos.y);
         set_label_text(&mouse_pos_label, mouse_pos_text);
         
-        draw_label(renderer, &mouse_pos_label);
-        draw_label(renderer, &message_label);
+        draw_label(renderer, get_vec2(800, 600), &mouse_pos_label);
+        draw_label(renderer, second_renderer->transform.position, &message_label);
 
-        bool clicked = draw_click_area_ex(
+        bool clicked = draw_click_area_sprites_ex(
                 renderer,
                 &input_data,
                 get_vec2(400, 300),
-                get_vec2(100, 50),
+                get_vec2(200, 100),
                 &button_normal_sprite,
                 &button_clicked_sprite,
+                &button_clicked_sprite,
+                &font,
+                COLOR_GREEN,
+                COLOR_BLACK,
+                "Click me!",
+                24,
+                PIVOT_CENTER
+        );
+
+        if (clicked) {
+            SDL_Log("Sprite!!");
+        }
+
+        clicked = draw_click_area_color_ex(
+                renderer,
+                &input_data,
+                get_vec2(400, 400),
+                get_vec2(200, 100),
+                COLOR_RED,
+                COLOR_BLUE,
+                COLOR_GREEN,
                 &font,
                 COLOR_WHITE,
                 COLOR_BLACK,
@@ -219,12 +241,32 @@ int main(int handle, char **params) {
                 24,
                 PIVOT_CENTER
         );
-        
+
         if (clicked) {
-            SDL_Log("ALO!!");
+            SDL_Log("Color!!");
         }
-        
-        
+
+        clicked = draw_click_area_colored_sprites_ex(
+                renderer,
+                &input_data,
+                get_vec2(400, 500),
+                get_vec2(200, 100),
+                &button_normal2_sprite,
+                COLOR_RED,
+                COLOR_BLUE,
+                COLOR_GREEN,
+                &font,
+                COLOR_WHITE,
+                COLOR_BLACK,
+                "Click me!",
+                24,
+                PIVOT_CENTER
+        );
+
+        if (clicked) {
+            SDL_Log("Sprite Color!!");
+        }
+                
         SDL_RenderPresent(renderer);
 
         end_frame(&time_data);

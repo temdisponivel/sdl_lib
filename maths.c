@@ -108,9 +108,9 @@ vec2_t normalize_rect_point(rect_t rect, vec2_t point) {
 
 bool is_point_inside_rect(rect_t rect, vec2_t point) {
     vec2_t normalized = normalize_rect_point(rect, point);
-    if (normalized.x < -1 || normalized.x > 1)
+    if (normalized.x < 0 || normalized.x > 1)
         return false;
-    else if (normalized.y < -1 || normalized.y > 1)
+    else if (normalized.y < 0 || normalized.y > 1)
         return false;
     return true;
 }

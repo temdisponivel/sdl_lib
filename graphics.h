@@ -123,4 +123,6 @@ void debug_draw_circle(SDL_Renderer *renderer, vec2_t center, float radius, colo
 
 void debug_draw_rect(SDL_Renderer *renderer, rect_t rect, color_t color);
 
+void debug_draw_fill_rect(SDL_Renderer *renderer, rect_t rect, color_t color);
+
 #endif //SDL_GAME_GRAPHICS_H
