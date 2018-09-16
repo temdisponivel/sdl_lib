@@ -17,20 +17,51 @@
 #define RESIZE_TO_FIT get_vec2(0xFFFFFF, 0xFFFFFF)
 #define RESIZE_HEIGHT(max_width) get_vec2((max_width), 0xFFFFFF)
 #define GET_HEIGHT_FOR_LINES(gui_data, max_lines) ((gui_data).line_spacing * (max_lines))
-#define RESIZE_HEIGHT_MAX_LINES(gui_data, max_width, max_lines) get_vec2((max_width), GET_HEIGHT_FOR_LINES((gui_data), (max_lines))) 
+#define RESIZE_HEIGHT_MAX_LINES(gui_data, max_width, max_lines) get_vec2((max_width), GET_HEIGHT_FOR_LINES((gui_data), (max_lines)))
 
-typedef struct gui_data {
+typedef enum font_style {
+    NORMAL = TTF_STYLE_NORMAL,
+    ITALIC = TTF_STYLE_ITALIC,
+    BOLD = TTF_STYLE_BOLD,
+    STROKE = TTF_STYLE_STRIKETHROUGH,
+    UNDERLINE = TTF_STYLE_UNDERLINE,    
+} FONT_STYLE;
+
+typedef struct font {
     TTF_Font *font;
     texture_t characters[DEFAULT_CHARACTER_SET_SIZE];
     int line_spacing;
-} gui_data_t;
+    int size_in_points;
+} font_t;
 
-void init_gui_data(SDL_Renderer *renderer, gui_data_t *gui_data, const char *font_path, int font_size_in_points);
+void init_font(SDL_Renderer *renderer, font_t *font, const char *font_path, int font_size_in_points, FONT_STYLE font_style);
 
-TTF_Font *load_font_from_file(const char *font_path, int size_in_points);
+TTF_Font *load_font_from_file(const char *font_path, int size_in_points, FONT_STYLE font_style);
 void destroy_font(TTF_Font *font);
 
-void draw_gui_string(SDL_Renderer *renderer, gui_data_t *gui_data, vec2_t screen_pos, vec2_t max_size, const char *string, color_t color, PIVOT pivot);
-void draw_world_string(SDL_Renderer *renderer, gui_data_t *gui_data, const camera_t *camera, const transform_t *transform, vec2_t max_size, const char *string, color_t color);
+vec2_t get_text_total_size(const font_t *font, const char *string, vec2_t max_size, int size_in_points);
+
+void draw_gui_string_ex(
+        SDL_Renderer *renderer, 
+        const font_t *font, 
+        vec2_t screen_pos, 
+        vec2_t max_size, 
+        const char *string, 
+        color_t color, 
+        float angle,
+        int size_in_points,
+        PIVOT pivot
+);
+
+void draw_world_string(
+        SDL_Renderer *renderer, 
+        const font_t *font, 
+        const camera_t *camera, 
+        const transform_t *transform, 
+        vec2_t max_size, 
+        const char *string, 
+        float angle,
+        color_t color
+);
 
 #endif //SDL_GAME_TEXT_H
