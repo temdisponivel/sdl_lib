@@ -129,7 +129,7 @@ int main(int handle, char **params) {
     
     label_t message_label;
     setup_label(&message_label, &font, "Hello, is anybody there?", COLOR_RED);
-
+    
     while (!input_data.quit_event_called) {
 
         start_frame(&time_data);
@@ -242,13 +242,13 @@ int main(int handle, char **params) {
                 24,
                 COLOR_WHITE,
                 COLOR_BLACK,
-                PIVOT_LEFT
+                PIVOT_CENTER_LEFT
         );
 
         if (clicked) {
             SDL_Log("Color!!");
         }
-
+        
         clicked = draw_click_area_colored_sprites_ex(
                 renderer,
                 &input_data,
@@ -264,13 +264,13 @@ int main(int handle, char **params) {
                 24,
                 COLOR_WHITE,
                 COLOR_BLACK,
-                PIVOT_RIGHT
+                PIVOT_CENTER_BOTTOM
         );
 
         if (clicked) {
             SDL_Log("Sprite Color!!");
         }
-                
+                        
         SDL_RenderPresent(renderer);
 
         end_frame(&time_data);

@@ -240,6 +240,12 @@ void setup_label_ex(label_t *label, font_t *font, const char *text, color_t colo
     label->resize_mode = resize_mode;
 }
 
+vec2_t get_label_pos_inside_rect(rect_t rect, PIVOT label_pivot) {
+    vec2_t pivot = get_normalized_pivot_point(label_pivot);
+    vec2_t pos = denormalize_point_inside_rect(rect, pivot);
+    return pos;
+}
+
 void set_label_text(label_t *label, const char *text) {
     size_t len = strlen(text);
     SDL_assert(len < MAX_LABEL_STRING_LEN);
@@ -308,8 +314,6 @@ bool draw_click_area_sprites_ex(
         color_t clicked_text_color,
         PIVOT text_pivot
 ) {
-    vec2_t original_pos = position;
-    
     bool hovered = false;
     bool clicked = false;
     bool released = false;
@@ -335,8 +339,9 @@ bool draw_click_area_sprites_ex(
     label_t label;
     setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
     label.max_size = size;
-        
-    draw_label(renderer, original_pos, &label);
+
+    vec2_t label_pos = get_label_pos_inside_rect(button_rect, text_pivot);
+    draw_label(renderer, label_pos, &label);
     
     return released;
 }
@@ -362,8 +367,6 @@ bool draw_click_area_colored_sprites_ex(
         color_t clicked_text_color,
         PIVOT text_pivot
 ) {
-    vec2_t original_pos = position;
-
     bool hovered = false;
     bool clicked = false;
     bool released = false;
@@ -391,8 +394,9 @@ bool draw_click_area_colored_sprites_ex(
     label_t label;
     setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
     label.max_size = size;
-    
-    draw_label(renderer, original_pos, &label);
+
+    vec2_t label_pos = get_label_pos_inside_rect(button_rect, text_pivot);
+    draw_label(renderer, label_pos, &label);
 
     return released;
 }
@@ -416,8 +420,6 @@ bool draw_click_area_color_ex(
         color_t clicked_text_color,
         PIVOT text_pivot
 ) {
-    vec2_t original_pos = position;
-
     bool hovered = false;
     bool clicked = false;
     bool released = false;
@@ -444,7 +446,8 @@ bool draw_click_area_color_ex(
     setup_label_ex(&label, font, text, text_color, text_pivot, text_size_in_points, LABEL_FIXED_SIZE);
     label.max_size = size;
 
-    draw_label(renderer, original_pos, &label);
+    vec2_t label_pos = get_label_pos_inside_rect(button_rect, text_pivot);
+    draw_label(renderer, label_pos, &label);
 
     return released;
 }

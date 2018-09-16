@@ -5,4 +5,3 @@ create a resource system to handle texture, sounds, etc
     
 add resolution-independent gui code
 add clamp options (elipse, clamp, break_line) to text drawing
-fix button label

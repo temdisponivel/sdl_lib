@@ -122,6 +122,13 @@ vec2_t denormalize_point(vec2_t region, vec2_t point) {
     return result;
 }
 
+vec2_t denormalize_point_inside_rect(rect_t region, vec2_t point) {
+    vec2_t result;
+    result.x = region.position.x + (region.size.width * point.x);
+    result.y = region.position.y + (region.size.height * point.y);
+    return result;
+}
+
 vec2_t get_normalized_pivot_point(PIVOT pivot) {
     float x = 0;
     float y = 0;
