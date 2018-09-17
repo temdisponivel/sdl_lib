@@ -9,7 +9,7 @@
 #include "graphics.h"
 
 #define MAX_COLLIDERS 256
-#define MAX_COLLISIONS_PER_COLLIDER 256
+#define MAX_COLLISIONS_PER_COLLIDER 16
 
 typedef enum {
     TOP_LEFT_AREA = 1 << 0,
@@ -26,9 +26,14 @@ typedef enum {
 struct collider;
 
 typedef struct collision {
-    struct collider *first;
-    struct collider *second;
+    struct collider *self;
+    struct collider *other;
 } collision_t;
+
+typedef struct collision_list {
+    collision_t collisions[MAX_COLLISIONS_PER_COLLIDER];
+    int collision_count;
+} collision_list_t; 
 
 typedef struct collider {
     int owner;
@@ -42,8 +47,17 @@ typedef struct collider {
         vec2_t box_size;
     };
     
-    collision_t collisions[MAX_COLLISIONS_PER_COLLIDER];
-    int collision_count;
+    collision_t *collision_enter[MAX_COLLISIONS_PER_COLLIDER];
+    int collision_enter_count;
+    
+    collision_t *collision_stay[MAX_COLLISIONS_PER_COLLIDER];
+    int collision_stay_count;
+    
+    collision_t *collision_exit[MAX_COLLISIONS_PER_COLLIDER];
+    int collision_exit_count;
+
+    collision_list_t last_frame_collisions;
+    collision_list_t current_frame_collisions;
 } collider_t;
 
 // TODO: Add areas to better performance (octree or something)

@@ -16,7 +16,8 @@ collider_t *get_base_collider(physics_data_t *physics_data, int owner, COLLIDER_
     collider_t *collider = &physics_data->colliders[physics_data->colliders_count++];
 
     collider->position = VEC2_ZERO;
-    collider->collision_count = 0;
+    collider->current_frame_collisions.collision_count = 0;
+    collider->last_frame_collisions.collision_count = 0;
     collider->owner = owner;
     collider->shape = shape;
 
@@ -41,25 +42,25 @@ void free_collider(physics_data_t *physics_data, collider_t *collider) {
 }
 
 void update_collider_pos_based_on_renderer(const sprite_renderer_t *sprite_renderer, collider_t *collider) {
-    transform_t *transform = &sprite_renderer->transform;
-    
+    transform_t *transform = sprite_renderer->transform;
+
     vec2_t position = transform->position;
     vec2_t size = sprite_renderer->sprite.texture_region.size;
     vec2_t scale = transform->scale;
     vec2_t pivot = sprite_renderer->normalized_pivot;
-    
+
     if (collider->shape == BOX) {
         rect_t sprite_rect = calculate_rect_based_on_pivot_and_scale(
-                position, 
-                size, 
-                scale, 
+                position,
+                size,
+                scale,
                 pivot
         );
-        
+
         collider->position = sprite_rect.position;
         collider->box_size = sprite_rect.size;
     } else {
-        
+
         rect_t sprite_rect = calculate_rect_based_on_pivot_and_scale(
                 position,
                 size,
@@ -68,10 +69,10 @@ void update_collider_pos_based_on_renderer(const sprite_renderer_t *sprite_rende
         );
 
         vec2_t center_pivot = get_normalized_pivot_point(PIVOT_CENTER);
-        
+
         vec2_t center_of_drawing = denormalize_point(sprite_rect.size, center_pivot);
         center_of_drawing = sum_vec2(center_of_drawing, sprite_rect.position);
-        
+
         collider->position = center_of_drawing;
         collider->circle_radius = sprite_rect.size.width / 2.f;
     }
@@ -101,9 +102,32 @@ bool validate_collision(const collider_t *collider_a, const collider_t *collider
     }
 }
 
+void add_collision(collider_t *collider, collider_t *other) {
+    if (collider->current_frame_collisions.collision_count < MAX_COLLISIONS_PER_COLLIDER) {
+
+        collision_t *collision_a = &collider->current_frame_collisions.collisions[collider->current_frame_collisions.collision_count++];
+        collision_a->self = collider;
+        collision_a->other = other;
+
+    } else {
+        SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "The collider owned by '%i' has more collisions than we can handle!", collider->owner);
+    }
+}
+
+int find_collision_index(collision_list_t *list, collider_t *other) {
+    for (int i = 0; i < list->collision_count; ++i) {
+        if (list->collisions[i].other == other) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 void update_physics_data(physics_data_t *physics_data) {
     for (int i = 0; i < physics_data->colliders_count; ++i) {
-        physics_data->colliders[i].collision_count = 0;
+        physics_data->colliders[i].last_frame_collisions = physics_data->colliders[i].current_frame_collisions;
+        physics_data->colliders[i].current_frame_collisions.collision_count = 0;
     }
 
     for (int i = 0; i < physics_data->colliders_count; ++i) {
@@ -114,17 +138,35 @@ void update_physics_data(physics_data_t *physics_data) {
             bool collided = validate_collision(collider_a, collider_b);
 
             if (collided) {
+                add_collision(collider_a, collider_b);
+                add_collision(collider_b, collider_a);
+            }
+        }
+    }
 
-                SDL_assert(collider_a->collision_count < MAX_COLLISIONS_PER_COLLIDER);
-                SDL_assert(collider_b->collision_count < MAX_COLLISIONS_PER_COLLIDER);
+    for (int i = 0; i < physics_data->colliders_count; ++i) {
+        collider_t *collider = &physics_data->colliders[i];
+        collider->collision_enter_count = 0;
+        collider->collision_stay_count = 0;
+        collider->collision_exit_count = 0;
 
-                collision_t *collision_a = &collider_a->collisions[collider_a->collision_count++];
-                collision_a->first = collider_a;
-                collision_a->second = collider_b;
+        for (int j = 0; j < collider->last_frame_collisions.collision_count; ++j) {
+            collision_t *last_frame = &collider->last_frame_collisions.collisions[j];
 
-                collision_t *collision_b = &collider_b->collisions[collider_b->collision_count++];
-                collision_b->first = collider_b;
-                collision_b->second = collider_a;
+            int index = find_collision_index(&collider->current_frame_collisions, last_frame->other);
+            if (index == -1) {
+                collider->collision_exit[collider->collision_exit_count++] = last_frame;
+            } else {
+                collider->collision_stay[collider->collision_stay_count++] = &collider->current_frame_collisions.collisions[index];
+            }
+        }
+
+        for (int j = 0; j < collider->current_frame_collisions.collision_count; ++j) {
+            collision_t *current_frame = &collider->current_frame_collisions.collisions[j];
+
+            int index = find_collision_index(&collider->last_frame_collisions, current_frame->other);
+            if (index == -1) {
+                collider->collision_enter[collider->collision_enter_count++] = current_frame;
             }
         }
     }
@@ -132,7 +174,7 @@ void update_physics_data(physics_data_t *physics_data) {
 
 void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider) {
     color_t color;
-    if (collider->collision_count > 0)
+    if (collider->current_frame_collisions.collision_count > 0)
         color = COLOR_BLUE;
     else
         color = COLOR_RED;

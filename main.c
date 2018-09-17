@@ -164,7 +164,7 @@ void not_main() {
             sprite_renderer_t tex_render = graphics_data->renderers[i];
             update_collider_pos_based_on_renderer(&tex_render, colliders[i]);
 
-            if (colliders[i]->collision_count > 0) {
+            if (colliders[i]->current_frame_collisions.collision_count > 0) {
                 message_label.color = COLOR_GREEN;
                 
                 if (!source->playing) {

@@ -20,4 +20,6 @@
 
 #define null NULL
 
+#define remove_item(list, index, count, type) SDL_memmove(&list[index], &list[count - 1], sizeof(type))
+
 #endif //SDL_GAME_DEFINES_H

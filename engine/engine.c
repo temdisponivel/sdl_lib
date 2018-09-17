@@ -54,9 +54,11 @@ void engine_start_draw(engine_data_t *engine_data) {
 void engine_draw_internal_systems_and_flip_video(engine_data_t *engine_data) {
 
     // TODO: Move this into a engine_draw_debug_[something] functions
-    draw_physics_debug(engine_data->video_data.sdl_renderer, &engine_data->physics_data);
     
     draw(engine_data->video_data.sdl_renderer, &engine_data->graphics_data);
+
+    draw_physics_debug(engine_data->video_data.sdl_renderer, &engine_data->physics_data);
+    
     flip_video(&engine_data->video_data);
 }
 
