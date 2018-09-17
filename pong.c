@@ -65,7 +65,7 @@ int main(int handle, char **params) {
     ball.renderer = get_sprite_renderer(&engine->graphics_data, &ball_texture);
     ball.renderer->transform = &ball.transform;
     ball.collider = get_box_collider(&engine->physics_data, ball.id, VEC2_ZERO);
-    ball.velocity = VEC2_RIGHT;
+    ball.velocity = get_vec2(RANDOM01(), RANDOM01());
 
     left->id = 0;
     left->transform.position.x = 0;
@@ -81,6 +81,7 @@ int main(int handle, char **params) {
 
     ball.transform.position = div_vec2(engine->video_data.resolution, 2.f);
 
+    vec2_t ball_half_size = div_vec2(ball.renderer->sprite.texture_region.size, 2.f);
     while (!engine_should_quit(engine)) {
         engine_start_update(engine);
 
@@ -89,6 +90,10 @@ int main(int handle, char **params) {
         vec2_t ball_speed = scale_vec2(ball.velocity, BALL_SPEED * engine->time_data.dt);
         ball.transform.position = sum_vec2(ball.transform.position, ball_speed);
         update_collider_pos_based_on_renderer(ball.renderer, ball.collider);
+        
+        if (ball.transform.position.y - ball_half_size.y <= 0 || ball.transform.position.y + ball_half_size.y >= engine->video_data.resolution.y) {
+            ball.velocity.y = -ball.velocity.y;
+        }
 
         for (int i = 0; i < PADDLE_COUNT; ++i) {
             paddle_t *paddle = &paddles[i];

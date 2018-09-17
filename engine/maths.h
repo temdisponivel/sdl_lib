@@ -85,6 +85,8 @@ typedef struct interpolation {
 #define LERP(x, y, delta) (((x) * (1 - (delta))) + ((y) * (delta)))
 #define RADIANS(degrees) (((degrees) / 180.f) * PI)
 #define DEGREES(radians)  ((180.f / PI) * (radians))  
+#define RANDOM(min, max) ((min) + (rand()  % ((max + 1) - (min))))
+#define RANDOM01() RANDOM(0, 1)
 
 vec2_t get_vec2(float x, float h);
 
