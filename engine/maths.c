@@ -185,14 +185,13 @@ circle_t get_circle(vec2_t pos, float radius) {
 }
 
 bool collide_rects(rect_t box_a, rect_t box_b) {
-    vec2_t normalized_b_to_a = normalize_rect_point(box_a, box_b.position);
-    if (normalized_b_to_a.x < -1 || normalized_b_to_a.x > 1) {
-        return false;
-    } else if (normalized_b_to_a.y < -1 || normalized_b_to_a.y > 1) {
-        return false;
-    } else {
-        return true;
-    }
+
+    return (
+            box_a.position.x < box_b.position.x + box_b.size.width &&
+            box_a.position.x + box_a.size.width > box_b.position.x &&
+            box_a.position.y < box_b.position.y + box_b.size.height &&
+            box_a.position.y + box_a.size.height > box_b.position.y
+    );
 }
 
 bool collide_circles(circle_t circle_a, circle_t circle_b) {

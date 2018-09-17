@@ -41,6 +41,7 @@ typedef struct sprite_animation {
 typedef struct sprite_renderer {
     sprite_t sprite;
     
+    // TODO: Should this really be a pointer?!
     transform_t *transform;
     vec2_t normalized_pivot;
     

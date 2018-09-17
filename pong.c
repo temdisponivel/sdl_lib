@@ -142,6 +142,8 @@ int main(int handle, char **params) {
                 ball.transform.position = desired_ball_pos;
             }
             
+            ball.transform.position = engine->input_data.mouse_pos;
+            
             update_collider_pos_based_on_renderer(ball.renderer, ball.collider);
 
             for (int i = 0; i < PADDLE_COUNT; ++i) {
