@@ -5,6 +5,8 @@
 #ifndef SDL_GAME_TIME_H
 #define SDL_GAME_TIME_H
 
+#include "defines.h"
+
 typedef struct time_data {
     float _start_frame_time;
     float unscaled_dt;

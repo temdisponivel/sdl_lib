@@ -149,6 +149,7 @@ int main(int handle, char **params) {
             }
 
             update_collider_pos_based_on_renderer(ball.renderer, ball.collider);
+            engine->graphics_data.camera.transform.position = ball.transform.position;
 
             for (int i = 0; i < PADDLE_COUNT; ++i) {
                 paddle_t *paddle = &paddles[i];

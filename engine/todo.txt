@@ -5,6 +5,7 @@ create a resource system to handle texture, sounds, etc
     
 fix collision audio not respecting the listener volume
 
+make camera position work
 add resolution-independent gui code
 add clamp options (elipse, clamp, break_line) to text drawing
 there's a weird thing happening with button labels if the button size doesn't accomodate the label size

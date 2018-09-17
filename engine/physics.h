@@ -79,7 +79,7 @@ bool validate_collision(const collider_t *collider_a, const collider_t *collider
 
 void update_physics_data(physics_data_t *physics_data);
 
-void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider);
-void draw_physics_debug(SDL_Renderer *renderer, physics_data_t *physics_data);
+void draw_collider_debug(SDL_Renderer *renderer, const camera_t *camera, collider_t *collider);
+void draw_physics_debug(SDL_Renderer *renderer, const camera_t *camera, physics_data_t *physics_data);
 
 #endif //SDL_GAME_PHYSICS_H

@@ -172,7 +172,7 @@ void update_physics_data(physics_data_t *physics_data) {
     }
 }
 
-void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider) {
+void draw_collider_debug(SDL_Renderer *renderer, const camera_t *camera, collider_t *collider) {
     color_t color;
     if (collider->current_frame_collisions.collision_count > 0)
         color = COLOR_BLUE;
@@ -181,15 +181,17 @@ void draw_collider_debug(SDL_Renderer *renderer, collider_t *collider) {
 
     if (collider->shape == BOX) {
         rect_t rect = get_rect(collider->position, collider->box_size);
+        rect.position = world_to_camera_pos(rect.position, camera);
         debug_draw_rect(renderer, rect, color);
     } else {
-        debug_draw_circle(renderer, collider->position, collider->circle_radius, color);
+        vec2_t position = world_to_camera_pos(collider->position, camera);
+        debug_draw_circle(renderer, position, collider->circle_radius, color);
     }
 }
 
-void draw_physics_debug(SDL_Renderer *renderer, physics_data_t *physics_data) {
+void draw_physics_debug(SDL_Renderer *renderer, const camera_t *camera, physics_data_t *physics_data) {
     for (int i = 0; i < physics_data->colliders_count; ++i) {
         collider_t *collider = &physics_data->colliders[i];
-        draw_collider_debug(renderer, collider);
+        draw_collider_debug(renderer, camera, collider);
     }
 }

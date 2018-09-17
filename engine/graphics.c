@@ -96,10 +96,15 @@ void draw_sprite_renderer(SDL_Renderer *renderer, const camera_t *camera, const 
     
     rect_t tex_region = tex_renderer->sprite.texture_region;
     vec2_t screen_size = mul_vec2(tex_region.size, tex_renderer->transform->scale);
-    vec2_t pivot = denormalize_point(screen_size, tex_renderer->normalized_pivot);
+    
+    vec2_t pivot = denormalize_point(screen_size, tex_renderer->normalized_pivot);    
     vec2_t world_pos = sub_vec2(tex_renderer->transform->position, pivot);
+    
+    world_pos = world_to_camera_pos(world_pos, camera);
+    
     rect_t screen_region = get_rect(world_pos, screen_size);
     float angle = tex_renderer->transform->angle - camera->transform.angle;
+    
     
     draw_texture_ex(renderer, screen_region, angle, tex_region, pivot, tex_renderer->sprite.texture);
 }
@@ -150,6 +155,12 @@ int compare_depth_func(const void *first, const void *second) {
     }
     
     return result;
+}
+
+vec2_t world_to_camera_pos(vec2_t world_pos, const camera_t *camera) {
+    world_pos = sub_vec2(world_pos, camera->transform.position);
+    world_pos = sum_vec2(world_pos, camera->_half_size);
+    return world_pos;
 }
 
 void update_graphics_data(graphics_data_t *graphics_data) {
