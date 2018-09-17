@@ -10,13 +10,26 @@
 
 #include "stb_image.h"
 
-void init_graphics_data(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
-    SDL_Surface *white_surface = SDL_CreateRGBSurface(0, 256, 256, 32, 255, 255, 255, 255);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, white_surface);
-    SDL_FreeSurface(white_surface);
+SDL_Surface *create_solid_color_surface(vec2_t size, color_t color) {
+    // Use default parameters
+    SDL_Surface *surface = SDL_CreateRGBSurface(0, (int) size.width, (int) size.height, 32, 0, 0, 0, 0);
+    SDL_PixelFormat *surface_pixel_format = surface->format;
+    SDL_FillRect(surface, null, SDL_MapRGBA(surface_pixel_format, COLOR_TO_PARAMETERS(color)));
+    return surface;
+}
+void create_solid_color_texture(SDL_Renderer *renderer, vec2_t size, color_t color, texture_t *destination) {
+    SDL_Surface *surface = create_solid_color_surface(size, color);
     
-    graphics_data->white_texture.handle = texture;
-    graphics_data->white_texture.size = get_vec2(256, 256);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    
+    destination->handle = texture;
+    destination->size = size;
+    
+    SDL_FreeSurface(surface);
+}
+
+void init_graphics_data(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
+    create_solid_color_texture(renderer, get_vec2(256, 256), COLOR_WHITE, &graphics_data->white_texture);
 }
 
 void load_texture_from_file(const char *file_path, SDL_Renderer *renderer, texture_t *destination) {

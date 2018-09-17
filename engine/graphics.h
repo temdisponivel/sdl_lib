@@ -89,6 +89,9 @@ typedef struct graphics_data {
 #define COLOR_TRANSPARENT get_color(0, 0, 0, 0)
 #define COLOR_TO_PARAMETERS(color) (color).red, (color).green, (color).blue, (color).alpha
 
+SDL_Surface *create_solid_color_surface(vec2_t size, color_t color);
+void create_solid_color_texture(SDL_Renderer *renderer, vec2_t size, color_t color, texture_t *destination);
+
 void init_graphics_data(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
 void load_texture_from_file(const char *file_name, SDL_Renderer *renderer, texture_t *texture);

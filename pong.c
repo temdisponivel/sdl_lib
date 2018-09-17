@@ -46,13 +46,14 @@ void start_ball(ball_t *ball) {
 }
 
 int main(int handle, char **params) {
+//int not_main() {
     window_parameters_t default_params;
     fill_default_window_parameters(&default_params);
     engine = init_engine(&default_params);
 
-#define BALL_SPEED 400
-#define PADDLE_SPEED 300
-#define PADDLE_COUNT 2
+    #define BALL_SPEED 400
+    #define PADDLE_SPEED 300
+    #define PADDLE_COUNT 2
     paddle_t paddles[PADDLE_COUNT];
 
     paddle_t *left = &paddles[0];
@@ -86,41 +87,46 @@ int main(int handle, char **params) {
     right->key_bind.down = KEY_DOWN;
 
     ball.transform.position = div_vec2(engine->video_data.resolution, 2.f);
-    
+
     sound_t ball_kick_sound = load_sound_from_file("data/pong/ball_kick.wav", EFFECT);
     audio_source_t *ball_kick_source = get_audio_source(&engine->audio_data, ball_kick_sound);
 
     sound_t goal_sound = load_sound_from_file("data/pong/goal.wav", EFFECT);
     audio_source_t *goal_source = get_audio_source(&engine->audio_data, goal_sound);
-
+    
+    sound_t background_music = load_sound_from_file("data/music.mp3", MUSIC);
+    audio_source_t *background_music_source = get_audio_source(&engine->audio_data, background_music);
+    background_music_source->volume = 0;
+    fade_in_audio_source(background_music_source, 5);
+    play_audio_source(background_music_source);
 
     font_t font;
     init_font_from_file(engine->video_data.sdl_renderer, &font, "data/consola.ttf", 24, FONT_NORMAL);
-    
+
     label_t points_label;
     setup_label(&points_label, &font, "%i X %i", COLOR_WHITE);
-        
+
     label_t button_label;
-    setup_label(&button_label, &font, "Start", COLOR_BLACK);
+    setup_label(&button_label, &font, "START", COLOR_BLUE);
     
     sprite_t sprite = create_sprite(&engine->graphics_data.white_texture);
     button_t start_button;
-    setup_button(&start_button, button_label, get_vec2(100, 50), sprite, COLOR_WHITE, COLOR_GREY, COLOR_BLACK, PIVOT_CENTER);
+    setup_button(&start_button, button_label, get_vec2(200, 75), sprite, COLOR_WHITE, COLOR_GREY, COLOR_BLACK, PIVOT_CENTER);
 
     vec2_t ball_half_size = div_vec2(ball.renderer->sprite.texture_region.size, 2.f);
-    
+
     int left_points = 0;
     int right_points = 0;
-    
+
     screen_center = div_vec2(engine->video_data.resolution, 2);
-    
+
     bool started = false;
-    
+
     while (!engine_should_quit(engine)) {
         engine_start_update(engine);
 
         engine_start_draw(engine);
-        
+
         if (started) {
             if (ball.transform.position.x - ball_half_size.x <= 0) {
                 right_points++;
@@ -131,7 +137,7 @@ int main(int handle, char **params) {
                 start_ball(&ball);
                 play_audio_source(goal_source);
             }
-            
+
             vec2_t ball_speed = scale_vec2(ball.direction, BALL_SPEED * engine->time_data.dt);
 
             vec2_t desired_ball_pos = sum_vec2(ball.transform.position, ball_speed);
@@ -141,9 +147,7 @@ int main(int handle, char **params) {
             } else {
                 ball.transform.position = desired_ball_pos;
             }
-            
-            ball.transform.position = engine->input_data.mouse_pos;
-            
+
             update_collider_pos_based_on_renderer(ball.renderer, ball.collider);
 
             for (int i = 0; i < PADDLE_COUNT; ++i) {
@@ -157,17 +161,17 @@ int main(int handle, char **params) {
                 if (is_key_held(&engine->input_data, paddle->key_bind.down)) {
                     direction.y = 1;
                 }
-                
+
                 vec2_t half_paddle = div_vec2(paddle->renderer->sprite.texture_region.size, 2.f);
 
                 vec2_t speed = scale_vec2(direction, PADDLE_SPEED * engine->time_data.dt);
-                vec2_t desired_pos = sum_vec2(paddle->transform.position, speed);                
+                vec2_t desired_pos = sum_vec2(paddle->transform.position, speed);
                 if (desired_pos.y - half_paddle.y >= 0 && desired_pos.y + half_paddle.y <= engine->video_data.resolution.height) {
                     paddle->transform.position = desired_pos;
                 }
-                
+
                 update_collider_pos_based_on_renderer(paddle->renderer, paddle->collider);
-                
+
                 for (int j = 0; j < paddle->collider->collision_enter_count; ++j) {
                     collision_t *collision = paddle->collider->collision_enter[j];
                     if (collision->other->owner == ball.id) {
@@ -176,11 +180,8 @@ int main(int handle, char **params) {
                     }
                 }
             }
-        } else {
-            started = draw_button(engine->video_data.sdl_renderer, &engine->input_data, screen_center, &start_button);
-            start_ball(&ball);
         }
-        
+
         if (is_key_pressed(&engine->input_data, KEY_r)) {
             start_ball(&ball);
         }
@@ -188,10 +189,15 @@ int main(int handle, char **params) {
         engine_update_internal_systems(engine);
 
         engine_draw_internal_systems(engine);
-        
-        string_format(points_label.text, "%i X %i", left_points, right_points);
-        draw_label(engine->video_data.sdl_renderer, screen_center, &points_label);
-        
+
+        if (started) {
+            string_format(points_label.text, "%i X %i", left_points, right_points);
+            draw_label(engine->video_data.sdl_renderer, screen_center, &points_label);
+        } else {
+            started = draw_button(engine->video_data.sdl_renderer, &engine->input_data, screen_center, &start_button);            
+            start_ball(&ball);
+        }
+
         engine_flip_buffers(engine);
 
         engine_end_update(engine);

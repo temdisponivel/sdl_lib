@@ -42,7 +42,7 @@ void not_main() {
     camera.transform.position = get_vec2(0, 0);
     graphics_data->camera = camera;
 
-#define ENTITY_COUNT 256
+#define ENTITY_COUNT 2
 
     collider_t *colliders[ENTITY_COUNT];
     
@@ -51,6 +51,7 @@ void not_main() {
     
     for (int i = 0; i < ENTITY_COUNT; ++i) {
         sprite_renderer_t *tex_renderer = get_sprite_renderer(graphics_data, &texture);
+        tex_renderer->transform = malloc(sizeof(transform_t));
         tex_renderer->transform->position = get_vec2(0, 0);
         tex_renderer->transform->scale = get_vec2(.5f, .5f);
         tex_renderer->normalized_pivot = get_normalized_pivot_point(PIVOT_CENTER);
@@ -66,6 +67,7 @@ void not_main() {
     
     sprite_renderer_t *first_renderer = &graphics_data->renderers[0];
     sprite_renderer_t *second_renderer = &graphics_data->renderers[1];
+    
     
     first_renderer->depth_inside_layer = 10;
 
@@ -248,7 +250,7 @@ void not_main() {
                 24,
                 COLOR_WHITE,
                 COLOR_BLACK,
-                PIVOT_CENTER_BOTTOM
+                PIVOT_CENTER
         );
 
         if (clicked) {
