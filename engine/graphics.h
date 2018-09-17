@@ -121,7 +121,7 @@ void free_sprite_renderer(graphics_data_t *graphics_data, sprite_renderer_t *ren
 rect_t calculate_rect_based_on_pivot_and_scale(vec2_t position, vec2_t size, vec2_t scale, vec2_t normalized_pivot);
 
 vec2_t world_to_camera_pos(vec2_t world_pos, const camera_t *camera);
-void update_graphics_data(graphics_data_t *graphics_data);
+void update_graphics_data(vec2_t current_resolution, graphics_data_t *graphics_data);
 void draw(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
 sprite_t create_sprite(texture_t *texture);

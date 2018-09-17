@@ -313,7 +313,7 @@ bool setup_base_click_area(input_data_t *input_data, vec2_t position, vec2_t siz
     *hovered = false;
     *clicked = false;
     *released = false;
-    if (is_button_holded(input_data, BUTTON_LEFT)) {
+    if (is_button_held(input_data, BUTTON_LEFT)) {
         *clicked = is_point_inside_rect(*button_rect, mouse_pos);
     } else if (is_button_released(input_data, BUTTON_LEFT)) {
         *released = is_point_inside_rect(*button_rect, mouse_pos);

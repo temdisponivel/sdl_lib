@@ -322,7 +322,7 @@ bool is_key_released(input_data_t *input_data, KEY key);
 
 bool is_button_normal(input_data_t *input_data, BUTTON button);
 bool is_button_pressed(input_data_t *input_data, BUTTON button);
-bool is_button_holded(input_data_t *input_data, BUTTON button);
+bool is_button_held(input_data_t *input_data, BUTTON button);
 bool is_button_released(input_data_t *input_data, BUTTON button);
 
 bool is_modifier_on(input_data_t *input_data, MODIFIERS modifier);

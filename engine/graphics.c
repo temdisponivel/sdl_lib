@@ -163,7 +163,9 @@ vec2_t world_to_camera_pos(vec2_t world_pos, const camera_t *camera) {
     return world_pos;
 }
 
-void update_graphics_data(graphics_data_t *graphics_data) {
+void update_graphics_data(vec2_t current_resolution, graphics_data_t *graphics_data) {
+    graphics_data->camera._half_size = div_vec2(current_resolution, 2);
+    
     for (int i = 0; i < MAX_LAYERS; ++i) {
         graphics_data->layers[i].renderer_count = 0;
     }

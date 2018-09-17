@@ -149,7 +149,6 @@ int main(int handle, char **params) {
             }
 
             update_collider_pos_based_on_renderer(ball.renderer, ball.collider);
-            engine->graphics_data.camera.transform.position = ball.transform.position;
 
             for (int i = 0; i < PADDLE_COUNT; ++i) {
                 paddle_t *paddle = &paddles[i];
@@ -185,6 +184,26 @@ int main(int handle, char **params) {
 
         if (is_key_pressed(&engine->input_data, KEY_r)) {
             start_ball(&ball);
+        }
+        
+        {
+            vec2_t camera_pos = engine->graphics_data.camera.transform.position;
+
+            if (is_key_held(&engine->input_data, KEY_d)) {
+                camera_pos.x++;
+            } else if (is_key_held(&engine->input_data, KEY_a)) {
+                camera_pos.x--;
+            } else if (is_key_held(&engine->input_data, KEY_w)) {
+                camera_pos.y--;
+            } else if (is_key_held(&engine->input_data, KEY_s)) {
+                camera_pos.y++;
+            }
+            
+            if (is_button_held(&engine->input_data, BUTTON_LEFT)) {
+                engine->graphics_data.camera.transform.angle++;
+            }
+
+            engine->graphics_data.camera.transform.position = camera_pos;
         }
 
         engine_update_internal_systems(engine);

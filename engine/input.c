@@ -903,7 +903,7 @@ bool is_button_pressed(input_data_t *input_data, BUTTON button) {
     return state.state == STATE_PRESSED;
 }
 
-bool is_button_holded(input_data_t *input_data, BUTTON button) {
+bool is_button_held(input_data_t *input_data, BUTTON button) {
     mouse_button_state_t state = get_button_state(input_data, button);
     return state.state == STATE_HELD;
 }

@@ -44,13 +44,8 @@ void engine_update_internal_systems(engine_data_t *engine_data) {
     update_input_data(&engine_data->input_data);
     update_physics_data(&engine_data->physics_data);
     update_audio_data(&engine_data->audio_data, &engine_data->time_data);
-    update_graphics_data(&engine_data->graphics_data);
+    update_graphics_data(engine_data->video_data.resolution, &engine_data->graphics_data);
     update_video_data(&engine_data->video_data);
-    
-    // TODO: TEMPORARY: this is not the best place to do this
-    // it's only here because we can't use video_data inside graphics because it'll create
-    // a circular reference
-    engine_data->graphics_data.camera._half_size = div_vec2(engine_data->video_data.resolution, 2);
 }
 
 void engine_start_draw(engine_data_t *engine_data) {
