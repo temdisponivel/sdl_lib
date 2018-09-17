@@ -3,11 +3,22 @@
 //
 
 #include <math.h>
+#include <stdio.h>
 #include "gui.h"
 #include "input.h"
 
 #define INDEX_TO_CHAR(index) ((ushort) ((index) + 32))
 #define CHAR_TO_INDEX(ch) ((int) ((ch) - 32))
+
+#define FORMAT_BUFFER_LEN 256
+#define STR_FORMAT_BUFFER char buffer[FORMAT_BUFFER_LEN]
+
+void string_format(char *buffer, const char *fmt, ...) {
+    va_list va;
+    va_start (va, fmt);
+    vsprintf (buffer, fmt, va);
+    va_end (va);
+}
 
 bool init_gui() {
     bool init_error = TTF_Init();
@@ -506,3 +517,4 @@ bool draw_button(
             button->label.pivot
     );
 }
+

@@ -19,7 +19,7 @@ void not_main() {
     SDL_Renderer *renderer = video_data->sdl_renderer;
 
     font_t font;
-    init_font_from_file(renderer, &font, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, ITALIC);
+    init_font_from_file(renderer, &font, DEFAULT_FONT_PATH, DEFAULT_FONT_SIZE, FONT_ITALIC);
 
     texture_t texture;
     load_texture_from_file("data/image.png", renderer, &texture);
@@ -260,8 +260,9 @@ void not_main() {
         if (clicked) {
             SDL_Log("Mouse pos clicked!!!");
         }
-        
-        engine_draw_internal_systems_and_flip_video(engine_data);
+
+        engine_draw_internal_systems(engine_data);
+        engine_flip_buffers(engine_data);
         engine_end_update(engine_data);
     }
     

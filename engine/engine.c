@@ -17,6 +17,7 @@ engine_data_t *init_engine(const window_parameters_t *window_parameters) {
     init_time_data(&engine_data->time_data);
     init_video(&engine_data->video_data, window_parameters);
     init_gui();
+    init_graphics_data(engine_data->video_data.sdl_renderer, &engine_data->graphics_data);
 
     bool audio_ok = init_audio(&engine_data->audio_data);
     if (!audio_ok) {
@@ -51,14 +52,15 @@ void engine_start_draw(engine_data_t *engine_data) {
     clear_window(&engine_data->video_data);
 }
 
-void engine_draw_internal_systems_and_flip_video(engine_data_t *engine_data) {
+void engine_draw_internal_systems(engine_data_t *engine_data) {
 
     // TODO: Move this into a engine_draw_debug_[something] functions
     
     draw(engine_data->video_data.sdl_renderer, &engine_data->graphics_data);
-
     draw_physics_debug(engine_data->video_data.sdl_renderer, &engine_data->physics_data);
-    
+}
+
+void engine_flip_buffers(engine_data_t *engine_data) {
     flip_video(&engine_data->video_data);
 }
 

@@ -10,6 +10,15 @@
 
 #include "stb_image.h"
 
+void init_graphics_data(SDL_Renderer *renderer, graphics_data_t *graphics_data) {
+    SDL_Surface *white_surface = SDL_CreateRGBSurface(0, 256, 256, 32, 255, 255, 255, 255);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, white_surface);
+    SDL_FreeSurface(white_surface);
+    
+    graphics_data->white_texture.handle = texture;
+    graphics_data->white_texture.size = get_vec2(256, 256);
+}
+
 void load_texture_from_file(const char *file_path, SDL_Renderer *renderer, texture_t *destination) {
 #define GET_CHANNELS_FROM_IMAGE 0
 

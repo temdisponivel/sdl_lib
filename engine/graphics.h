@@ -74,6 +74,8 @@ typedef struct graphics_data {
     uint renderers_count;
     
     drawing_layer_t layers[MAX_LAYERS];
+    
+    texture_t white_texture;    
 } graphics_data_t;
 
 #define COLOR_CHANNEL_FULL 255
@@ -82,8 +84,11 @@ typedef struct graphics_data {
 #define COLOR_BLUE get_color(0, 0, COLOR_CHANNEL_FULL, 0)
 #define COLOR_BLACK get_color(0, 0, 0, COLOR_CHANNEL_FULL)
 #define COLOR_WHITE get_color(COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL, COLOR_CHANNEL_FULL)
+#define COLOR_GREY get_color(128, 128, 128, COLOR_CHANNEL_FULL)
 #define COLOR_TRANSPARENT get_color(0, 0, 0, 0)
 #define COLOR_TO_PARAMETERS(color) (color).red, (color).green, (color).blue, (color).alpha
+
+void init_graphics_data(SDL_Renderer *renderer, graphics_data_t *graphics_data);
 
 void load_texture_from_file(const char *file_name, SDL_Renderer *renderer, texture_t *texture);
 

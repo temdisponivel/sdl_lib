@@ -16,7 +16,7 @@
 
 #define DEFAULT_CHARACTER_SET_SIZE 128
 
-#define DEFAULT_PIVOT PIVOT_CENTER_LEFT
+#define DEFAULT_PIVOT PIVOT_CENTER
 
 #define RESIZE_TO_FIT get_vec2(0xFFFFFF, 0xFFFFFF)
 #define RESIZE_HEIGHT(max_width) get_vec2((max_width), 0xFFFFFF)
@@ -24,11 +24,11 @@
 #define MAX_LABEL_STRING_LEN 256
 
 typedef enum font_style {
-    NORMAL = TTF_STYLE_NORMAL,
-    ITALIC = TTF_STYLE_ITALIC,
-    BOLD = TTF_STYLE_BOLD,
-    STROKE = TTF_STYLE_STRIKETHROUGH,
-    UNDERLINE = TTF_STYLE_UNDERLINE,    
+    FONT_NORMAL = TTF_STYLE_NORMAL,
+    FONT_ITALIC = TTF_STYLE_ITALIC,
+    FONT_BOLD = TTF_STYLE_BOLD,
+    FONT_STROKE = TTF_STYLE_STRIKETHROUGH,
+    FONT_UNDERLINE = TTF_STYLE_UNDERLINE,    
 } FONT_STYLE;
 
 typedef enum {
@@ -70,6 +70,8 @@ typedef struct button {
     color_t hover_color;
     color_t clicked_color;
 } button_t;
+
+void string_format(char *buffer, const char *fmt, ...);
 
 bool init_gui();
 

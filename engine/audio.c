@@ -68,7 +68,7 @@ sound_t load_sound_from_file(const char *file_path, SOUND_TYPE type) {
         Mix_Music *music = Mix_LoadMUS(file_path);
         
         if (music == null) {
-            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load music file at path: '%s'. Make sure the file exists and it's of supported format: OGG, MP3 or WAV.");
+            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load music file at path: '%s'. Make sure the file exists and it's of supported format: OGG, MP3 or WAV.", file_path);
         }
         
         sound.music = music;
@@ -76,7 +76,7 @@ sound_t load_sound_from_file(const char *file_path, SOUND_TYPE type) {
         Mix_Chunk *chunk = Mix_LoadWAV(file_path);
         
         if (chunk == null) {
-            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load sound effect file at path: '%s'. Make sure the file exists and it's of supported format: OGG, MP3 or WAV.");
+            SDL_LogError(SDL_LOG_CATEGORY_ASSERT, "Couldn't load sound effect file at path: '%s'. Make sure the file exists and it's of supported format: OGG, MP3 or WAV.", file_path);
         }
         
         sound.chunk = chunk;

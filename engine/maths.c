@@ -62,6 +62,11 @@ vec2_t mul_vec2(vec2_t a, vec2_t b) {
     return result;
 }
 
+vec2_t normalize_vec2(vec2_t vec) {
+    float len = magnitude_vec2(vec);
+    return div_vec2(vec, len);
+}
+
 float sqrd_magnitude_vec2(vec2_t vec) {
     return (vec.x * vec.x + vec.y * vec.y);
 }
